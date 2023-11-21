@@ -25,4 +25,7 @@
 
    </group>
 
+   <node pkg="bridge_px4" type="vine_bridge.py" name ="vine_bridge" output="screen">
+   </node>
+
 </launch>
