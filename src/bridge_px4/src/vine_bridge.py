@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 import rospy
 from std_msgs.msg import String
 import time
@@ -6,7 +6,7 @@ import serial
 
 class VineBridge:
     def __init__(self):
-        self.arduino = serial.Serial(port='COM3', baudrate=115200, timeout=.05)
+        self.arduino = serial.Serial(port='/dev/ttyACM0', baudrate=115200, timeout=.05)
 
     # def write_read(self, x):
     #     self.arduino.write(bytes(x, 'utf-8'))
