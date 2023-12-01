@@ -11,15 +11,15 @@ SetpointPublisher::SetpointPublisher()
     pos_sp_sub  = nh.subscribe("setpoint/position",1,&SetpointPublisher::pos_sp_cb,this);
     att_sp_sub  = nh.subscribe("setpoint/attitude",1,&SetpointPublisher::att_sp_cb,this);
 
-    pose_sp_pub  = nh.advertise<geometry_msgs::PoseStamped>("mavros/setpoint_position/local",1);
+    pose_sp_pub  = nh.advertise<geometry_msgs::PoseStamped>("/mavros/setpoint_position/local",1);
 
-    pose_curr_sub = nh.subscribe("mavros/local_position/pose",10,&SetpointPublisher::pose_curr_cb,this);
-    mav_state_sub = nh.subscribe("mavros/state",1,&SetpointPublisher::mav_state_cb,this);
+    pose_curr_sub = nh.subscribe("/mavros/local_position/pose",10,&SetpointPublisher::pose_curr_cb,this);
+    mav_state_sub = nh.subscribe("/mavros/state",1,&SetpointPublisher::mav_state_cb,this);
 
     setpointLoop = nh.createTimer(ros::Duration(1.0/sp_out_hz),&SetpointPublisher::setpoint_cb, this);
     checkupLoop  = nh.createTimer(ros::Duration(1.0/checkup_hz),&SetpointPublisher::checkup_cb, this);
 
-    land_client = nh.serviceClient<mavros_msgs::CommandTOL>("mavros/cmd/land");
+    land_client = nh.serviceClient<mavros_msgs::CommandTOL>("/mavros/cmd/land");
 
     ROS_INFO("ROS Components Initialized");
 
@@ -33,7 +33,7 @@ SetpointPublisher::SetpointPublisher()
 
     // Constants and Counters Initialized
     k_main = 0;
-    dt_max = ros::Duration(1.0/checkup_hz);
+    dt_max = ros::Duration(100.0/checkup_hz);
     quat_forward.w = 1.0;
     quat_forward.x = 0.0;
     quat_forward.y = 0.0;
@@ -83,13 +83,16 @@ void SetpointPublisher::setpoint_cb(const ros::TimerEvent& event)
     case STARTUP:
     {
         // Do State Tasks
-        ROS_DEBUG("STARTUP");
+        // ROS_INFO("STARTUP");
 
         pose_sa = pose_curr.pose;
         pose_sa.position.z = 0.0f;
 
         pose_sp_out.pose = pose_sa;
         pub_sp();
+
+        // std::cout << "ep_stream_state: " << ep_stream_state << std::endl;
+        // std::cout << "ob_mode_state: " << ob_mode_state << std::endl;
 
         // State Transition
         if ((ep_stream_state == EP_ON) && (ob_mode_state == OB_OFF))
@@ -98,7 +101,7 @@ void SetpointPublisher::setpoint_cb(const ros::TimerEvent& event)
             ROS_INFO("SP_PUB_STATE: LINKED");
         } else if ((ep_stream_state == EP_ON) && (ob_mode_state != OB_OFF))
         {
-            ROS_DEBUG("OFFBOARD switch is not off. Blocking state transform from STARTUP to LINKED.");
+            ROS_INFO("OFFBOARD switch is not off. Blocking state transform from STARTUP to LINKED.");
         } else
         {
             // Stay in State
@@ -193,7 +196,7 @@ void SetpointPublisher::setpoint_cb(const ros::TimerEvent& event)
             land();
 
             sp_pub_state = STARTUP;
-            ROS_INFO("SP_PUB_STATE: INIT");
+            ROS_INFO("SP_PUB_STATE: ACTIVE -> INIT");
         } else {
             // Stay in State
         }
@@ -225,6 +228,7 @@ void SetpointPublisher::checkup_cb(const ros::TimerEvent& event) {
         sp_stream_state = SP_OFF;
     }
     
+    // std::cout << "time diff: " << t_now - pose_curr.header.stamp << std::endl;
     // Check if Target States are Publishing
     if ((t_now - pose_curr.header.stamp) < dt_max) {
         ep_stream_state = EP_ON;
@@ -238,12 +242,12 @@ void SetpointPublisher::checkup_cb(const ros::TimerEvent& event) {
                 pose_curr.pose.position.y - pose_sp_out.pose.position.y,
                 pose_curr.pose.position.z - pose_sp_out.pose.position.z;
 
-    if (err_pos.norm() > r_fs) {
-        land();
+    // if ((err_pos.norm() > r_fs) && ((sp_pub_state == ACTIVE) || (sp_pub_state == HOVER))) {
+    //     land();
 
-        sp_pub_state = STARTUP;
-        ROS_INFO("SP_PUB_STATE: INIT");
-    }
+    //     sp_pub_state = STARTUP;
+    //     ROS_INFO("SP_PUB_STATE: INIT");
+    // }
 }
 
 void SetpointPublisher::land() {

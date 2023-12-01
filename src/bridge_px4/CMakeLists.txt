@@ -4,6 +4,12 @@ project(bridge_px4)
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++14)
 
+set(mavros_DIR "/home/oem/StanfordMSL/mavros/devel/share/mavros/cmake")
+set(mavros_extras_DIR "/home/oem/StanfordMSL/mavros/devel/share/mavros_extras/cmake")
+set(mavros_msgs_DIR "/home/oem/StanfordMSL/mavros/devel/share/mavros_msgs/cmake")
+set(libmavconn_DIR "/home/oem/StanfordMSL/mavros/devel/share/libmavconn/cmake")
+set(mavlink_DIR "/home/oem/StanfordMSL/mavlink/devel/share/mavlink/cmake")
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages

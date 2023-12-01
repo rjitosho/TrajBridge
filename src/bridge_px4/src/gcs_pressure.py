@@ -1,10 +1,10 @@
-# #!/usr/bin/env python
+#!/home/oem/virtualenvs/flyingvine/bin/python3
 
 import rospy
 from std_msgs.msg import String
 
 def main():
-    rospy.init_node('teensy_communication_python')
+    rospy.init_node('teensy_communication_pressure')
     pub = rospy.Publisher('pressure_cmd', String, queue_size=1)
 
     while not rospy.is_shutdown():
