@@ -1,6 +1,6 @@
 <launch>
       <node pkg="bridge_px4" type="gcs.py" name ="gcs" output="screen">
-            <param name="traj_name" value="descend.csv"/>
+            <param name="traj_name" value="sinusoids.csv"/>
             <param name="hold" value="5"/>
             <param name="laps" value="10"/>
       </node>
