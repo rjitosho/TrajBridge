@@ -2,6 +2,12 @@
       <node pkg="bridge_px4" type="gcs.py" name ="gcs" output="screen">
             <param name="traj_name" value="sinusoids.csv"/>
             <param name="hold" value="5"/>
-            <param name="laps" value="10"/>
+            <param name="laps" value="2"/>
       </node>
+
+      <node pkg="rosbag" type="record" name="rosbag_record_gcs"
+            args="/drone5/mavros/vision_pose/pose 
+                  /drone5/mavros/local_position/pose
+                  /drone5/mavros/sepoint_position/local
+                  /gcs/setpoint/position"/>
 </launch>
