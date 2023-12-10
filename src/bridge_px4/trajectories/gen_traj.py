@@ -2,17 +2,17 @@ import numpy as np
 from numpy import savetxt
 import matplotlib.pyplot as plt
 
-def step(t0, DT, x, y=None):
-    x[t0:t0+DT] = np.zeros(DT) 
-    x[t0+DT:t0+2*DT] = np.ones(DT)
-    x[t0+2*DT:t0+3*DT] = np.zeros(DT)
-    x[t0+3*DT:t0+4*DT] = -np.ones(DT)
+def step(t0, DT, x, y=None, x_offset=0, y_offset=0, x_scale=1, y_scale=1):
+    x[t0:t0+DT] = np.zeros(DT) + x_offset
+    x[t0+DT:t0+2*DT] = x_scale*np.ones(DT) + x_offset
+    x[t0+2*DT:t0+3*DT] = np.zeros(DT) + x_offset
+    x[t0+3*DT:t0+4*DT] = -x_scale*np.ones(DT) + x_offset
 
     if y is not None:
-        y[t0:t0+DT] = np.zeros(DT)
-        y[t0+DT:t0+2*DT] = np.ones(DT)
-        y[t0+2*DT:t0+3*DT] = np.zeros(DT)
-        y[t0+3*DT:t0+4*DT] = -np.ones(DT)
+        y[t0:t0+DT] = np.zeros(DT) + y_offset
+        y[t0+DT:t0+2*DT] = y_scale*np.ones(DT) + y_offset
+        y[t0+2*DT:t0+3*DT] = np.zeros(DT) + y_offset
+        y[t0+3*DT:t0+4*DT] = -y_scale*np.ones(DT) + y_offset
     return x, y
 
 def pattern(t0, dt, wait, period, x, y, z):
@@ -39,31 +39,31 @@ def pattern(t0, dt, wait, period, x, y, z):
 # vine preland - go diagonally in x and z
 # T = 100.0
 # t = np.arange(0.0, T, 0.05)
-# x = np.minimum(.3*t, 1.2*np.ones(len(t)))
+# x = np.minimum(.4*t, 2*np.ones(len(t)))
 # y = np.zeros(len(t))
-# z = np.maximum(1.5-.3*t, 0.3*np.ones(len(t)))
+# z = np.maximum(1.5-.3*t, 0.05*np.ones(len(t)))
 
 # sysID suite
 dt = 0.05
 T_step = 4
 T_step_period = 2.0
-T_wait = 2.0
+T_wait = 2.04
 T_pattern = 15.0
 
 T = T_step * 6 + T_wait + T_pattern
 t = np.arange(0.0, T, dt)
 x = np.zeros(len(t))
 y = np.zeros(len(t))
-z = np.zeros(len(t))
+z = 1.5*np.ones(len(t))
 DT = int(T_step_period/2/dt)
 
 x = step(0, DT, x)[0]
 y = step(4*DT, DT, y)[0]
-z = step(8*DT, DT, z)[0]
+z = step(8*DT, DT, z, x_offset=1.5, x_scale=.4)[0]
 
 x,y = step(12*DT, DT, x, y)
-x,z = step(16*DT, DT, x, z)
-y,z = step(20*DT, DT, y, z)
+x,z = step(16*DT, DT, x, z, y_offset=1.5, y_scale=.4)
+y,z = step(20*DT, DT, y, z, y_offset=1.5, y_scale=.4)
 
 x,y,z = pattern(24*DT, dt, T_wait, T_pattern, x, y, z)
 
