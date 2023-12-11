@@ -45,8 +45,7 @@ def pattern(t0, dt, wait, period, x, y, z):
 
 # sysID suite
 dt = 0.05
-T_step = 4
-T_step_period = 2.0
+T_step = 8
 T_wait = 2.04
 T_pattern = 15.0
 
@@ -55,7 +54,7 @@ t = np.arange(0.0, T, dt)
 x = np.zeros(len(t))
 y = np.zeros(len(t))
 z = 1.5*np.ones(len(t))
-DT = int(T_step_period/2/dt)
+DT = int(T_step/4/dt)
 
 x = step(0, DT, x)[0]
 y = step(4*DT, DT, y)[0]
