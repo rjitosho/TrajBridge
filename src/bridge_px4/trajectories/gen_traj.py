@@ -39,14 +39,14 @@ def pattern(t0, dt, wait, period, x, y, z):
 # vine preland - go diagonally in x and z
 # T = 100.0
 # t = np.arange(0.0, T, 0.05)
-# x = np.minimum(.4*t, 2*np.ones(len(t)))
+# x = np.minimum(.4*t, 1.75*np.ones(len(t)))
 # y = np.zeros(len(t))
-# z = np.maximum(1.5-.3*t, 0.05*np.ones(len(t)))
+# z = np.maximum(1.5-.3*t, 0.2*np.ones(len(t)))
 
 # sysID suite
 dt = 0.05
-T_step = 8
-T_wait = 2.04
+T_step = 8.0
+T_wait = 2.0
 T_pattern = 15.0
 
 T = T_step * 6 + T_wait + T_pattern
@@ -80,4 +80,4 @@ ax.plot(t, X[1:4,:].T)
 plt.show()
 
 # save trajectory
-np.savetxt('sysID.csv', X, delimiter=',', fmt='%1.3f')
+np.savetxt('sysIDlong.csv', X, delimiter=',', fmt='%1.3f')
