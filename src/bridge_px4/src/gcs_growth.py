@@ -1,15 +1,15 @@
-# #!/usr/bin/env python
+#!/usr/bin/env python
 
 import rospy
 from std_msgs.msg import String
 
 def main():
-    rospy.init_node('teensy_communication_python')
+    rospy.init_node('teensy_communication_growth')
     pub = rospy.Publisher('growth_cmd', String, queue_size=1)
 
     while not rospy.is_shutdown():
-        # request body pressure
-        input_str = input("Enter body pressure: ")
+        # request growth rate
+        input_str = input("Enter growth rate: ")
         try:
             _ = float(input_str)
         except ValueError:
