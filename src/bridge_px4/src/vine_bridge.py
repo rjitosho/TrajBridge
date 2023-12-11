@@ -19,9 +19,11 @@ class VineBridge:
     #     return [float(data[offset*i:(offset*i+12)]) for i in range(return_size)]
 
     def growth_cmd_cb(self, data):
+        print("growth_cmd_cb: " + data.data)
         self.arduino.write(bytes('g'+data.data, 'utf-8'))
 
     def pressure_cmd_cb(self, data):
+        print("pressure_cmd_cb: " + data.data)
         self.arduino.write(bytes('p'+data.data, 'utf-8'))
     
     def listener(self):
@@ -35,4 +37,5 @@ class VineBridge:
 
 if __name__ == '__main__':
     vb = VineBridge()
+    print("Vine bridge node started")
     vb.listener()
