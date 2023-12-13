@@ -30,11 +30,11 @@ def pattern(t0, dt, wait, period, x, y, z):
     return x, y, z
 
 # sinusoids
-# T = 10.0
-# t = np.arange(0.0, T, 0.05)
-# x = np.sin(2*np.pi*t*2/T)
-# y = np.cos(2*np.pi*t*3/T)
-# z = np.ones(len(t))
+T = 9.0
+t = np.arange(0.0, T, 0.05)
+x = np.sin(2*np.pi*t*2/T)
+y = np.cos(2*np.pi*t*3/T)
+z = 1.5*np.ones(len(t))
 
 # vine preland - go diagonally in x and z
 # T = 100.0
@@ -44,27 +44,27 @@ def pattern(t0, dt, wait, period, x, y, z):
 # z = np.maximum(1.5-.3*t, 0.2*np.ones(len(t)))
 
 # sysID suite
-dt = 0.05
-T_step = 8.0
-T_wait = 2.0
-T_pattern = 15.0
+# dt = 0.05
+# T_step = 8.0
+# T_wait = 2.0
+# T_pattern = 15.0
 
-T = T_step * 6 + T_wait + T_pattern
-t = np.arange(0.0, T, dt)
-x = np.zeros(len(t))
-y = np.zeros(len(t))
-z = 1.5*np.ones(len(t))
-DT = int(T_step/4/dt)
+# T = T_step * 6 + T_wait + T_pattern
+# t = np.arange(0.0, T, dt)
+# x = np.zeros(len(t))
+# y = np.zeros(len(t))
+# z = 1.5*np.ones(len(t))
+# DT = int(T_step/4/dt)
 
-x = step(0, DT, x)[0]
-y = step(4*DT, DT, y)[0]
-z = step(8*DT, DT, z, x_offset=1.5, x_scale=.4)[0]
+# x = step(0, DT, x)[0]
+# y = step(4*DT, DT, y)[0]
+# z = step(8*DT, DT, z, x_offset=1.5, x_scale=.4)[0]
 
-x,y = step(12*DT, DT, x, y)
-x,z = step(16*DT, DT, x, z, y_offset=1.5, y_scale=.4)
-y,z = step(20*DT, DT, y, z, y_offset=1.5, y_scale=.4)
+# x,y = step(12*DT, DT, x, y)
+# x,z = step(16*DT, DT, x, z, y_offset=1.5, y_scale=.4)
+# y,z = step(20*DT, DT, y, z, y_offset=1.5, y_scale=.4)
 
-x,y,z = pattern(24*DT, dt, T_wait, T_pattern, x, y, z)
+# x,y,z = pattern(24*DT, dt, T_wait, T_pattern, x, y, z)
 
 # assemble trajectory
 X = np.zeros((14,len(t)))
@@ -80,4 +80,4 @@ ax.plot(t, X[1:4,:].T)
 plt.show()
 
 # save trajectory
-np.savetxt('sysIDlong.csv', X, delimiter=',', fmt='%1.3f')
+np.savetxt('sinusoids_9s.csv', X, delimiter=',', fmt='%1.3f')
