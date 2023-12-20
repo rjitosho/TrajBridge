@@ -8,8 +8,8 @@ Auto_RC::Auto_RC()
     att_sp_sub  = nh.subscribe("setpoint/attitude",1,&Auto_RC::att_sp_cb,this);
 
     // Setup ROS Services
-    arming_client = nh.serviceClient<mavros_msgs::CommandBool>("/drone1/mavros/cmd/arming");
-    set_mode_client = nh.serviceClient<mavros_msgs::SetMode>("/drone1/mavros/set_mode");
+    arming_client = nh.serviceClient<mavros_msgs::CommandBool>("/drone5/mavros/cmd/arming");
+    set_mode_client = nh.serviceClient<mavros_msgs::SetMode>("/drone5/mavros/set_mode");
     
     // Take Off
     rc_takeoff_sequence();
@@ -48,7 +48,6 @@ void Auto_RC::rc_takeoff_sequence()
     if (set_mode_client.call(set_mode) && set_mode.response.mode_sent)
     {
         ROS_INFO("Drone Switched to OFFBOARD.");
-
     }
     ros::Duration(1.0).sleep();
     
