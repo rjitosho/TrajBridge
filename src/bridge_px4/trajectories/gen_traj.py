@@ -29,12 +29,26 @@ def pattern(t0, dt, wait, period, x, y, z):
     z[t1:t2] = 1.5 + 0.5*np.sin(2*np.pi*t*1/period)
     return x, y, z
 
-# sinusoids
-T = 9.0
+# figure 8
+T = 10.0
 t = np.arange(0.0, T, 0.05)
-x = np.sin(2*np.pi*t*2/T)
-y = np.cos(2*np.pi*t*3/T)
-z = 1.5*np.ones(len(t))
+x = np.sin(t)
+y = np.sin(t) * np.cos(t)
+z = 0.5*np.ones(len(t))
+
+# cirlce
+# T = 10.0
+# t = np.arange(0.0, T, 0.05)
+# x = np.sin(t)
+# y = np.cos(t)
+# z = 0.5*np.ones(len(t))
+
+# sinusoids
+# T = 9.0
+# t = np.arange(0.0, T, 0.05)
+# x = np.sin(2*np.pi*t*2/T)
+# y = np.cos(2*np.pi*t*3/T)
+# z = 1.5*np.ones(len(t))
 
 # vine preland - go diagonally in x and z
 # T = 100.0
@@ -79,5 +93,9 @@ fig, ax = plt.subplots()
 ax.plot(t, X[1:4,:].T)
 plt.show()
 
+fig, ax = plt.subplots()
+ax.plot(X[1,:], X[2,:])
+plt.show()
+
 # save trajectory
-np.savetxt('sinusoids_9s.csv', X, delimiter=',', fmt='%1.3f')
+np.savetxt('EE_fig8_10s.csv', X, delimiter=',', fmt='%1.3f')
