@@ -178,10 +178,15 @@ void SetpointPublisher::setpoint_cb(const ros::TimerEvent& event)
 
         pose_sa = pose_curr.pose;
         
-        pose_sp_out.pose.position.x = pos_sp_in.point.x + pose_st.position.x;
-        pose_sp_out.pose.position.y = pos_sp_in.point.y + pose_st.position.y;
-        pose_sp_out.pose.position.z = pos_sp_in.point.z + pose_st.position.z;
+        // shift based on starting position
+        // pose_sp_out.pose.position.x = pos_sp_in.point.x + pose_st.position.x;
+        // pose_sp_out.pose.position.y = pos_sp_in.point.y + pose_st.position.y;
+        // pose_sp_out.pose.position.z = pos_sp_in.point.z + pose_st.position.z;
 
+        // don't shift
+        pose_sp_out.pose.position.x = pos_sp_in.point.x;
+        pose_sp_out.pose.position.y = pos_sp_in.point.y;
+        pose_sp_out.pose.position.z = pos_sp_in.point.z;
 
         pose_sp_out.pose.orientation = att_sp_in.quaternion;
         pub_sp();
