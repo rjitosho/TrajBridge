@@ -2,29 +2,24 @@
    <!-- Initialize Mocap Generator -->
    <node pkg="bridge_px4" type="mocap_gen" name ="mocap_gen" output="screen">
    </node>
-   
-   <group ns="drone1">   
-   <!-- Initialize the Onboard Setpoint Publisher -->
-   <node pkg="bridge_px4" type="setpoint_publisher" name ="setpoint_publisher" output="screen">
-	   <param name="sp_out_hz" value="200.0"/>
-      <param name="checkup_hz" value="200.0"/>
-      <param name="pos_hz_min" value="5.0"/>
-      <param name="vel_hz_min" value="5.0"/>
-      <param name="att_hz_min" value="100.0"/>
-      <param name="checkup_hz_min" value="5.0"/>
-      <param name="dt_fs" value="3.0"/>
-      <param name="dt_rs" value="1.0"/>
-   </node>
 
-   <!-- Initialize the High Rate Controller -->
-   <node pkg="bridge_px4" type="hr_control" name ="hr_control" output="screen">
-      <param name="pxy_slim" value="999.0"/>
-      <param name="pz_slim" value="999.5"/>
-      <param name="v_slim" value="999.5"/>
-      <param name="q_slim" value="999.5"/>
-      <param name="ep_lim" value="999.0"/>
-      <param name="eq_lim" value="999.5"/>
-   </node>
+   <group ns="drone5">   
+
+   <!-- Initialize the Onboard Setpoint Transformer -->
+	<node pkg="bridge_px4" type="setpoint_transform.py" name ="setpoint_transform" output="screen">
+      <param name="drone_id" value="drone5"/>
+      <param name="x_off" value="0.00"/>
+      <param name="y_off" value="0.00"/>
+      <param name="z_off" value="0.00"/>
+	</node>
+
+   <!-- Initialize the Onboard Setpoint Publisher -->
+	<node pkg="bridge_px4" type="setpoint_publisher" name ="setpoint_publisher" output="screen">
+	   <param name="sp_out_hz" value="200.0"/>
+      <param name="checkup_hz" value="10.0"/>
+      <param name="z_fs" value="1.5"/>
+      <param name="r_fs" value="999.0"/>
+	</node>
 
    <!-- Initialize the mavros bridge over serial -->
 	<include file="$(find mavros)/launch/node.launch">
