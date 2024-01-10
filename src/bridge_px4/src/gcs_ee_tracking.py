@@ -6,6 +6,7 @@ import numpy as np
 from geometry_msgs.msg import PointStamped
 from geometry_msgs.msg import QuaternionStamped
 from geometry_msgs.msg import PoseStamped
+from std_msgs.msg import String
 import os 
 
 class GCS:
@@ -15,6 +16,14 @@ class GCS:
         hold = rospy.get_param("gcs/hold")
         laps = rospy.get_param("gcs/laps")
 
+        # P control params
+        self.kx, self.ky, self.kz = 0.1, 0.1, 0.1
+        self.max_correction = 0.5
+        self.param_pub = rospy.Publisher("gcs/setpoint/parameters",String,queue_size=1)
+        param_msg = String()
+        param_msg.data = str(self.kx) + "," + str(self.ky) + "," + str(self.kz) + "," + str(self.max_correction)
+        self.param_pub.publish(param_msg)
+        
         # Trajectory Variables
         self.T,self.X,self.aN,self.dt = self.traj_gen(traj_name,hold,laps)
 
@@ -34,9 +43,14 @@ class GCS:
 
         # History of last 10 tip poses
         self.tip_pose_hist = []
+        self.vision_pose_hist = []
 
         # Wait for first tip pose
-        while self.tip_pose.pose.position.x == 0:
+        while (self.tip_pose.pose.position.x == 0):
+            pass
+
+        # Wait for first vision pose
+        while (self.vision_pose.pose.position.x == 0):
             pass
 
         # fill up history
@@ -44,12 +58,18 @@ class GCS:
             self.tip_pose_hist.append([self.tip_pose.pose.position.x,
                                        self.tip_pose.pose.position.y,
                                        self.tip_pose.pose.position.z])
+            self.vision_pose_hist.append([self.vision_pose.pose.position.x,
+                                          self.vision_pose.pose.position.y,
+                                          self.vision_pose.pose.position.z])
             rospy.sleep(self.dt)
 
     def tip_pose_cb(self, data):
         self.tip_pose = data
         # print("tip_pose_cb: " + str(self.tip_pose.pose.position.x) + ", " + str(self.tip_pose.pose.position.y) + ", " + str(self.tip_pose.pose.position.z))
     
+    def vision_pose_cb(self, data):
+        self.vision_pose = data
+
     def traj_gen(self,traj_name,hold,laps) -> Tuple[np.ndarray,np.ndarray]:
         # Get Address of Trajectory
         dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -91,6 +111,16 @@ class GCS:
         pos_msg = PointStamped()
         att_msg = QuaternionStamped()
 
+        # update history
+        self.tip_pose_hist.append([self.tip_pose.pose.position.x,
+                                   self.tip_pose.pose.position.y,
+                                   self.tip_pose.pose.position.z])
+        self.tip_pose_hist.pop(0)
+        self.vision_pose_hist.append([self.vision_pose.pose.position.x,
+                                      self.vision_pose.pose.position.y,
+                                      self.vision_pose.pose.position.z])
+        self.vision_pose_hist.pop(0)
+
         # P control on tip position
         x_correction = self.X[0,kf] - self.tip_pose.pose.position.x
         y_correction = self.X[0,kf] - self.tip_pose.pose.position.y
@@ -98,10 +128,9 @@ class GCS:
         vine_length = 1.5
 
         # clip corrections
-        max_correction = 0.0
-        x_correction = np.clip(x_correction, -max_correction, max_correction)
-        y_correction = np.clip(y_correction, -max_correction, max_correction)
-        z_correction = np.clip(z_correction, -max_correction, max_correction)
+        x_correction = np.clip(self.kx*x_correction, -self.max_correction, self.max_correction)
+        y_correction = np.clip(self.ky*y_correction, -self.max_correction, self.max_correction)
+        z_correction = np.clip(self.kz*z_correction, -self.max_correction, self.max_correction)
 
         # Position
         pos_msg.header.stamp = t_now

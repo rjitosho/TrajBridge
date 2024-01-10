@@ -1,9 +1,9 @@
 <launch>
       <node pkg="bridge_px4" type="gcs.py" name ="gcs" output="screen">
-            <!-- <param name="traj_name" value="sysIDlong.csv"/> -->
-            <param name="traj_name" value="sinusoids_10s.csv"/>
+            <param name="traj_name" value="sysIDlong.csv"/>
+            <!-- <param name="traj_name" value="sinusoids_10s.csv"/> -->
             <param name="hold" value="3"/>
-            <param name="laps" value="2"/>
+            <param name="laps" value="1"/>
       </node>
 
       <node pkg="rosbag" type="record" name="rosbag_record_gcs"
