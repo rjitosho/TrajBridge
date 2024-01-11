@@ -1,6 +1,6 @@
 <launch>
       <node pkg="bridge_px4" type="gcs_ee_tracking.py" name ="gcs" output="screen">
-            <param name="traj_name" value="EE_fig8_10s.csv"/>
+            <param name="traj_name" value="EE_fig8_10s_Pcontrol.csv"/>
             <param name="hold" value="3"/>
             <param name="laps" value="1"/>
       </node>

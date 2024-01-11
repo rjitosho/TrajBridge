@@ -125,7 +125,7 @@ class GCS:
         x_correction = self.X[0,kf] - self.tip_pose.pose.position.x
         y_correction = self.X[0,kf] - self.tip_pose.pose.position.y
         z_correction = self.X[0,kf] - self.tip_pose.pose.position.z
-        vine_length = 1.5
+        vine_length = 1.3
 
         # clip corrections
         x_correction = np.clip(self.kx*x_correction, -self.max_correction, self.max_correction)
