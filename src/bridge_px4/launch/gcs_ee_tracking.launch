@@ -14,5 +14,6 @@
                   /vrpn_client_node/tip/pose
                   /drone5/mavros/imu/data
                   /gcs/setpoint/position
-                  /gcs/setpoint/attitude"/>
+                  /gcs/setpoint/attitude
+                  /gcs/setpoint/parameters"/>
 </launch>
