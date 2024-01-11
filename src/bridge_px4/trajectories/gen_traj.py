@@ -30,11 +30,12 @@ def pattern(t0, dt, wait, period, x, y, z):
     return x, y, z
 
 # figure 8
-T = 10.0
-t = np.arange(0.0, T, 0.05)
-x = np.sin(t)
-y = np.sin(t) * np.cos(t)
-z = 0.5*np.ones(len(t))
+# T = 10.0
+# t = np.arange(0.0, T, 0.05)
+# period = 10.0
+# x = np.sin(2*np.pi/period*t)
+# y = np.sin(2*np.pi/period*t) * np.cos(2*np.pi/period*t)
+# z = 0.5*np.ones(len(t))
 
 # cirlce
 # T = 10.0
@@ -51,11 +52,11 @@ z = 0.5*np.ones(len(t))
 # z = 1.5*np.ones(len(t))
 
 # vine preland - go diagonally in x and z
-# T = 100.0
-# t = np.arange(0.0, T, 0.05)
-# x = np.minimum(.4*t, 1.75*np.ones(len(t)))
-# y = np.zeros(len(t))
-# z = np.maximum(1.5-.3*t, 0.2*np.ones(len(t)))
+T = 100.0
+t = np.arange(0.0, T, 0.05)
+x = np.minimum(.4*t, 1.75*np.ones(len(t)))
+y = np.zeros(len(t))
+z = np.maximum(1.5-.3*t, 0.15*np.ones(len(t)))
 
 # sysID suite
 # dt = 0.05
@@ -98,4 +99,4 @@ ax.plot(X[1,:], X[2,:])
 plt.show()
 
 # save trajectory
-np.savetxt('EE_fig8_10s.csv', X, delimiter=',', fmt='%1.3f')
+np.savetxt('prelandv2.csv', X, delimiter=',', fmt='%1.3f')
