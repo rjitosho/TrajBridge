@@ -18,37 +18,36 @@ class GCS:
         self.drone_pub = rospy.Publisher("/drone5/mavros/vision_pose/pose",PoseStamped,queue_size=1)
 
         # Subscribers
-        rospy.Subscriber("/gcs/setpoint/position", PointStamped, self.gcs_setpoint_position_cb)
-        self.gcs_setpoint = PointStamped()
-        self.gcs_setpoint.point.x = 0
-        self.gcs_setpoint.point.y = 0
-        self.gcs_setpoint.point.z = 1.5
+        rospy.Subscriber("/gcs/setpoint/position2", PointStamped, self.gcs_setpoint_position_cb)
         
-        # flying vine state
-        self.z = np.zeros(45)
-        self.z[2::9] = 1.5
-        self.z[7::9] = .5
+        # fake data
+        self.i = 0
+        self.fake_data = np.load("/home/oem/flyingSysID/2024-01-11-12-29-27_EE-fig8-10s-motionplan.npz", allow_pickle=True)
 
     def gcs_setpoint_position_cb(self, data):
-        self.gcs_setpoint = data
+        self.i += 1
     
     def fake_pose_out(self, event=None):
         # Publish fake drone pose
         drone_msg = PoseStamped()
         drone_msg.header.stamp = rospy.Time.now()
         drone_msg.header.frame_id = "map"
-        drone_msg.pose.position.x = self.gcs_setpoint.point.x
-        drone_msg.pose.position.y = self.gcs_setpoint.point.y
-        drone_msg.pose.position.z = self.gcs_setpoint.point.z
+        drone_msg.pose.position.x = self.fake_data["local_position"][self.i, 1]
+        drone_msg.pose.position.y = self.fake_data["local_position"][self.i, 2]
+        drone_msg.pose.position.z = self.fake_data["local_position"][self.i, 3]
+        drone_msg.pose.orientation.w = self.fake_data["local_position"][self.i, 4]
+        drone_msg.pose.orientation.x = self.fake_data["local_position"][self.i, 5]
+        drone_msg.pose.orientation.y = self.fake_data["local_position"][self.i, 6]
+        drone_msg.pose.orientation.z = self.fake_data["local_position"][self.i, 7]
         self.drone_pub.publish(drone_msg)
         
         # Publish fake tip pose
         tip_msg = PoseStamped()
         tip_msg.header.stamp = rospy.Time.now()
         tip_msg.header.frame_id = "map"
-        tip_msg.pose.position.x = self.gcs_setpoint.point.x
-        tip_msg.pose.position.y = self.gcs_setpoint.point.y
-        tip_msg.pose.position.z = self.gcs_setpoint.point.z-1
+        tip_msg.pose.position.x = self.fake_data["tip_pose"][self.i, 1]
+        tip_msg.pose.position.y = self.fake_data["tip_pose"][self.i, 2]
+        tip_msg.pose.position.z = self.fake_data["tip_pose"][self.i, 3]
         self.tip_pub.publish(tip_msg)
 
 if __name__ == '__main__':
