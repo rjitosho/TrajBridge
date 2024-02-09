@@ -22,7 +22,7 @@ class GCS:
         
         # fake data
         self.i = 0
-        self.fake_data = np.load("/home/oem/flyingSysID/2024-01-11-12-29-27_EE-fig8-10s-motionplan.npz", allow_pickle=True)
+        self.fake_data = np.load("/home/oem/flyingSysID/2024-01-11-12-29-27_EE-fig8-10s-motionplan_resampled_0-05.npz", allow_pickle=True)
 
     def gcs_setpoint_position_cb(self, data):
         self.i += 1
