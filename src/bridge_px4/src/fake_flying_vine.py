@@ -21,7 +21,7 @@ class GCS:
         rospy.Subscriber("/gcs/setpoint/position2", PointStamped, self.gcs_setpoint_position_cb)
         
         # fake data
-        self.i = 0
+        self.i = 2
         self.fake_data = np.load("/home/oem/flyingSysID/2024-01-11-12-29-27_EE-fig8-10s-motionplan_resampled_0-05.npz", allow_pickle=True)
 
     def gcs_setpoint_position_cb(self, data):

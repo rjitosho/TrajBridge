@@ -15,8 +15,13 @@ struct PoseMeasurement
 end
 
 function callback(msg::PoseStamped, measurement)
-    print(msg.pose.position)
-    measurement.msg = msg
+    # print("in callback\n")
+    measurement.msg.pose.position.x = msg.pose.position.x
+    measurement.msg.pose.position.y = msg.pose.position.y
+    measurement.msg.pose.position.z = msg.pose.position.z
+    measurement.msg.pose.orientation.x = msg.pose.orientation.x
+    measurement.msg.pose.orientation.y = msg.pose.orientation.y
+    measurement.msg.pose.orientation.z = msg.pose.orientation.z
 end
 
 function publish_pose_cmd(pos_pub_obj, att_pub_obj, t_now, i, u)
@@ -87,17 +92,26 @@ function reset_measurement!(tip_measurement, drone_measurement)
     tip_measurement.msg.pose.position.z = 0.501
 end
 
-
+function plot_current_motion_plan(x_sol, u_sol, xref, num_steps, i)
+    h = plot([x[7] for x in xref[i .+ (1:num_steps)]], [x[8] for x in xref[i .+ (1:num_steps)]], linewidth=2, label="reference", aspect_ratio=:equal)
+    plot!([x[7] for x in x_sol], [x[8] for x in x_sol], linewidth=2, label="drone", aspect_ratio=:equal)
+    plot!([x[1] for x in x_sol], [x[2] for x in x_sol], linewidth=2, label="tip", aspect_ratio=:equal)
+    plot!([u[1] for u in u_sol], [u[2] for u in u_sol], linewidth=2, label="control", aspect_ratio=:equal)
+    display(h)
+end
 
 function loop(pos_pub_obj, att_pub_obj, mpc_data, tip_measurement, drone_measurement; num_steps = 200, override=true)
     i = 0
     x_sol, u_sol = mpc_data.x_sol, mpc_data.u_sol
     U = zeros(3, num_steps)
     Z = zeros(45, num_steps)
+    Z1 = zeros(45, num_steps)
+    X_drone = zeros(3, num_steps)
+    X_tip = zeros(3, num_steps)
     reset_state!(x_sol[2])
     reset_measurement!(tip_measurement, drone_measurement)
 
-    loop_rate = Rate(20.0)
+    loop_rate = Rate(2.0)
     for i in 1:num_steps
         t_now = RobotOS.now()
         
@@ -105,8 +119,10 @@ function loop(pos_pub_obj, att_pub_obj, mpc_data, tip_measurement, drone_measure
             update_state!(x_sol[2], tip_measurement, drone_measurement)
         end
 
-        print("State: ", x_sol[2][1:9], "\n")
-        update_problem!(mpc_data.solver, mpc_data.objectives[i], mpc_data.model, x_sol, [u_sol[2:end]..., u_sol[end]])
+        print("State: ", round.(x_sol[2][1:3]; digits=4), "\n")
+        # update_problem!(mpc_data.solver, mpc_data.objectives[i], mpc_data.model, x_sol, [u_sol[2:end]..., u_sol[end]])
+        update_problem!(mpc_data.solver, mpc_data.objectives[i], mpc_data.model, x_sol, mpc_data.uref[(i-1) .+ (1:length(mpc_data.model))])
+        # update_problem!(mpc_data.solver, mpc_data.objectives[i], mpc_data.model, x_sol, mpc_data.uref[1:24])
         
         x_sol, u_sol = get_trajectory(mpc_data.solver)
 
@@ -114,13 +130,24 @@ function loop(pos_pub_obj, att_pub_obj, mpc_data, tip_measurement, drone_measure
 
         print("Iteration: ", i, " Time: ", (RobotOS.now() - t_now).nsecs/10^9, "\n")
         
+        X_drone[1, i] = drone_measurement.msg.pose.position.x
+        X_drone[2, i] = drone_measurement.msg.pose.position.y
+        X_drone[3, i] = drone_measurement.msg.pose.position.z
+        X_tip[1, i] = tip_measurement.msg.pose.position.x
+        X_tip[2, i] = tip_measurement.msg.pose.position.y
+        X_tip[3, i] = tip_measurement.msg.pose.position.z
+        Z1[:, i] = x_sol[1]
         Z[:, i] = x_sol[2]
         U[:, i] = u_sol[1]
+
+        plot_current_motion_plan(x_sol, u_sol, mpc_data.xref, length(x_sol), i)
+
+        readline()
 
         rossleep(loop_rate)
     end
 
-    return Z, U
+    return Z, U, X_drone, X_tip, Z1
 end
 
 init_node("mpc_node")
@@ -129,8 +156,8 @@ init_node("mpc_node")
 drone_measurement = PoseMeasurement(PoseStamped())
 tip_measurement = PoseMeasurement(PoseStamped())
 
-Subscriber{PoseStamped}("/vrpn_client_node/tip/pose", callback, (tip_measurement,))
-Subscriber{PoseStamped}("/drone5/mavros/vision_pose/pose", callback, (drone_measurement,))
+Subscriber{PoseStamped}("/vrpn_client_node/tip/pose", callback, (tip_measurement,), queue_size=1)
+Subscriber{PoseStamped}("/drone5/mavros/vision_pose/pose", callback, (drone_measurement,), queue_size=1)
 
 # publishers
 pos_pub = Publisher{PointStamped}("/gcs/setpoint/position2",queue_size=1)
@@ -148,8 +175,30 @@ T2 = 400
 xref, uref = gen_Z_from_tip(T2, 5, 200) #T2, history_size, period
 # plot_reference(xref, uref)
 problem_data = MPC(T, T2, A_full, B_full, xref, uref);
-Z, U = loop(pos_pub, att_pub, problem_data, tip_measurement, drone_measurement, 
-            num_steps=10, override=false)
+print("Problem data initialized\n")
+# Z, U, X, Z1 = loop(pos_pub, att_pub, problem_data, tip_measurement, drone_measurement, 
+#             num_steps=10, override=false)
 
-display(plot(U[1,:], U[2,:], linewidth=2, label="control", aspect_ratio=:equal))
-display(plot(Z[1,:], Z[2,:], linewidth=2, label="position", aspect_ratio=:equal))
+# display(plot(U[1,:], U[2,:], linewidth=2, label="control", aspect_ratio=:equal))
+# display(plot(Z[1,:], Z[2,:], linewidth=2, label="position", aspect_ratio=:equal))
+# display(plot(X[1,:], X[2,:], linewidth=2, label="drone", aspect_ratio=:equal))
+
+function plot_results(show_control=false, show_reference=false)
+    h = plot([0],[0])
+    plot!(Z[1,:], Z[2,:], linewidth=2, label="Z drone", aspect_ratio=:equal)
+    plot!(Z[7,:], Z[8,:], linewidth=2, label="Z tip", aspect_ratio=:equal)
+    plot!(Z1[1,:], Z1[2,:], linewidth=2, label="Z1 drone", aspect_ratio=:equal)
+    plot!(Z1[7,:], Z1[8,:], linewidth=2, label="Z1 tip", aspect_ratio=:equal)
+    plot!(X_drone[1,:], X[2,:], linewidth=2, label="drone", aspect_ratio=:equal, linestyle=:dash)
+    plot!(X_tip[1,:], X_tip[2,:], linewidth=2, label="tip", aspect_ratio=:equal, linestyle=:dash)
+    if show_control
+        plot!(U[1,:], U[2,:], linewidth=2, label="control", aspect_ratio=:equal)
+    end
+    if show_reference
+        num_steps = length(Z[1,:])
+        plot!([x[7] for x in xref[1:num_steps]], [x[8] for x in xref[1:num_steps]], linewidth=2, label="tip reference", aspect_ratio=:equal)
+    end
+    display(h)
+end
+
+# Z, U, X_drone, X_tip, Z1 = loop(pos_pub, att_pub, problem_data, tip_measurement, drone_measurement, num_steps=14, override=false);
