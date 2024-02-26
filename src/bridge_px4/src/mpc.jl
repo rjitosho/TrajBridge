@@ -5,23 +5,16 @@ using mpc_data
 using MAT
 using RobotOS
 @rosimport geometry_msgs.msg: Point, Pose2D, PointStamped, QuaternionStamped, PoseStamped
+@rosimport std_msgs.msg: Float32MultiArray
 rostypegen()
 using .geometry_msgs.msg
+using .std_msgs.msg
 using Plots
 
 
-struct PoseMeasurement
-    msg
-end
-
-function callback(msg::PoseStamped, measurement)
-    # print("in callback\n")
-    measurement.msg.pose.position.x = msg.pose.position.x
-    measurement.msg.pose.position.y = msg.pose.position.y
-    measurement.msg.pose.position.z = msg.pose.position.z
-    measurement.msg.pose.orientation.x = msg.pose.orientation.x
-    measurement.msg.pose.orientation.y = msg.pose.orientation.y
-    measurement.msg.pose.orientation.z = msg.pose.orientation.z
+function callback(msg::Float32MultiArray, current_z)
+    print("in callback\n")
+    current_z .= msg.data
 end
 
 function publish_pose_cmd(pos_pub_obj, att_pub_obj, t_now, i, u)
@@ -100,7 +93,7 @@ function plot_current_motion_plan(x_sol, u_sol, xref, num_steps, i)
     display(h)
 end
 
-function loop(pos_pub_obj, att_pub_obj, mpc_data, tip_measurement, drone_measurement; num_steps = 200, override=true)
+function loop(pos_pub_obj, att_pub_obj, mpc_data, tip_measurement, drone_measurement, current_koopman_state; num_steps = 200, override=true)
     i = 0
     x_sol, u_sol = mpc_data.x_sol, mpc_data.u_sol
     U = zeros(3, num_steps)
@@ -116,7 +109,8 @@ function loop(pos_pub_obj, att_pub_obj, mpc_data, tip_measurement, drone_measure
         t_now = RobotOS.now()
         
         if ! override
-            update_state!(x_sol[2], tip_measurement, drone_measurement)
+            # update_state!(x_sol[2], tip_measurement, drone_measurement)
+            x_sol[2] .= current_koopman_state
         end
 
         print("State: ", round.(x_sol[2][1:3]; digits=4), "\n")
@@ -153,11 +147,14 @@ end
 init_node("mpc_node")
 
 # subscribers
-drone_measurement = PoseMeasurement(PoseStamped())
-tip_measurement = PoseMeasurement(PoseStamped())
+# drone_measurement = PoseMeasurement(PoseStamped())
+# tip_measurement = PoseMeasurement(PoseStamped())
 
-Subscriber{PoseStamped}("/vrpn_client_node/tip/pose", callback, (tip_measurement,), queue_size=1)
-Subscriber{PoseStamped}("/drone5/mavros/vision_pose/pose", callback, (drone_measurement,), queue_size=1)
+# Subscriber{PoseStamped}("/vrpn_client_node/tip/pose", callback, (tip_measurement,), queue_size=1)
+# Subscriber{PoseStamped}("/drone5/mavros/vision_pose/pose", callback, (drone_measurement,), queue_size=1)
+
+current_koopman_state = zeros(45)
+Subscriber{Float32MultiArray}("/z_flying_vine", callback, (current_koopman_state,), queue_size=1)
 
 # publishers
 pos_pub = Publisher{PointStamped}("/gcs/setpoint/position2",queue_size=1)
@@ -201,4 +198,4 @@ function plot_results(show_control=false, show_reference=false)
     display(h)
 end
 
-# Z, U, X_drone, X_tip, Z1 = loop(pos_pub, att_pub, problem_data, tip_measurement, drone_measurement, num_steps=14, override=false);
+# Z, U, X_drone, X_tip, Z1 = loop(pos_pub, att_pub, problem_data, tip_measurement, drone_measurement, current_koopman_state, num_steps=14, override=false);
