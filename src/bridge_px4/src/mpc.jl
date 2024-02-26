@@ -13,8 +13,8 @@ using Plots
 
 
 function callback(msg::Float32MultiArray, current_z)
-    print("in callback\n")
-    current_z .= msg.data
+    # print("in callback\n")
+    current_z .= convert(Vector{Float32}, msg.data)
 end
 
 function publish_pose_cmd(pos_pub_obj, att_pub_obj, t_now, i, u)
@@ -86,10 +86,12 @@ function reset_measurement!(tip_measurement, drone_measurement)
 end
 
 function plot_current_motion_plan(x_sol, u_sol, xref, num_steps, i)
-    h = plot([x[7] for x in xref[i .+ (1:num_steps)]], [x[8] for x in xref[i .+ (1:num_steps)]], linewidth=2, label="reference", aspect_ratio=:equal)
-    plot!([x[7] for x in x_sol], [x[8] for x in x_sol], linewidth=2, label="drone", aspect_ratio=:equal)
-    plot!([x[1] for x in x_sol], [x[2] for x in x_sol], linewidth=2, label="tip", aspect_ratio=:equal)
-    plot!([u[1] for u in u_sol], [u[2] for u in u_sol], linewidth=2, label="control", aspect_ratio=:equal)
+    h = plot([x[7] for x in xref[i .+ (1:num_steps)]], [x[8] for x in xref[i .+ (1:num_steps)]], linewidth=2, label="tip_desired", aspect_ratio=:equal)
+    plot!([x[7] for x in x_sol], [x[8] for x in x_sol], linewidth=2, label="tip_plan", aspect_ratio=:equal)
+    plot!([x[1] for x in x_sol], [x[2] for x in x_sol], linewidth=2, label="drone_plan", aspect_ratio=:equal)
+    plot!([u[1] for u in u_sol], [u[2] for u in u_sol], linewidth=2, label="control_plan", aspect_ratio=:equal)
+    xlims!(-1.5, 1.5)
+    ylims!(-1.0, 1.0)
     display(h)
 end
 
@@ -101,10 +103,10 @@ function loop(pos_pub_obj, att_pub_obj, mpc_data, tip_measurement, drone_measure
     Z1 = zeros(45, num_steps)
     X_drone = zeros(3, num_steps)
     X_tip = zeros(3, num_steps)
-    reset_state!(x_sol[2])
-    reset_measurement!(tip_measurement, drone_measurement)
+    # reset_state!(x_sol[2])
+    # reset_measurement!(tip_measurement, drone_measurement)
 
-    loop_rate = Rate(2.0)
+    loop_rate = Rate(20.0)
     for i in 1:num_steps
         t_now = RobotOS.now()
         
@@ -113,9 +115,9 @@ function loop(pos_pub_obj, att_pub_obj, mpc_data, tip_measurement, drone_measure
             x_sol[2] .= current_koopman_state
         end
 
-        print("State: ", round.(x_sol[2][1:3]; digits=4), "\n")
+        # print("State: ", round.(x_sol[2][1:3]; digits=4), "\n")
         # update_problem!(mpc_data.solver, mpc_data.objectives[i], mpc_data.model, x_sol, [u_sol[2:end]..., u_sol[end]])
-        update_problem!(mpc_data.solver, mpc_data.objectives[i], mpc_data.model, x_sol, mpc_data.uref[(i-1) .+ (1:length(mpc_data.model))])
+        update_problem!(mpc_data.solver, mpc_data.objectives[i+5], mpc_data.model, x_sol, mpc_data.uref[(i-1) .+ (1:length(mpc_data.model))])
         # update_problem!(mpc_data.solver, mpc_data.objectives[i], mpc_data.model, x_sol, mpc_data.uref[1:24])
         
         x_sol, u_sol = get_trajectory(mpc_data.solver)
@@ -124,19 +126,19 @@ function loop(pos_pub_obj, att_pub_obj, mpc_data, tip_measurement, drone_measure
 
         print("Iteration: ", i, " Time: ", (RobotOS.now() - t_now).nsecs/10^9, "\n")
         
-        X_drone[1, i] = drone_measurement.msg.pose.position.x
-        X_drone[2, i] = drone_measurement.msg.pose.position.y
-        X_drone[3, i] = drone_measurement.msg.pose.position.z
-        X_tip[1, i] = tip_measurement.msg.pose.position.x
-        X_tip[2, i] = tip_measurement.msg.pose.position.y
-        X_tip[3, i] = tip_measurement.msg.pose.position.z
+        # X_drone[1, i] = drone_measurement.msg.pose.position.x
+        # X_drone[2, i] = drone_measurement.msg.pose.position.y
+        # X_drone[3, i] = drone_measurement.msg.pose.position.z
+        # X_tip[1, i] = tip_measurement.msg.pose.position.x
+        # X_tip[2, i] = tip_measurement.msg.pose.position.y
+        # X_tip[3, i] = tip_measurement.msg.pose.position.z
         Z1[:, i] = x_sol[1]
         Z[:, i] = x_sol[2]
         U[:, i] = u_sol[1]
 
         plot_current_motion_plan(x_sol, u_sol, mpc_data.xref, length(x_sol), i)
 
-        readline()
+        # readline()
 
         rossleep(loop_rate)
     end
@@ -198,4 +200,17 @@ function plot_results(show_control=false, show_reference=false)
     display(h)
 end
 
-# Z, U, X_drone, X_tip, Z1 = loop(pos_pub, att_pub, problem_data, tip_measurement, drone_measurement, current_koopman_state, num_steps=14, override=false);
+# Z, U, X_drone, X_tip, Z1 = loop(pos_pub, att_pub, problem_data, 1, 1, current_koopman_state, num_steps=14, override=false);
+
+
+# # Load real control
+# mat_file = matopen("/home/oem/flyingSysID/fig8_sim_real_history_size_5.mat")
+# U_real = read(mat_file, "U")
+# close(mat_file)
+
+# plot(U[1,:], U[2,:], linewidth=2, label="control", aspect_ratio=:equal)
+# # plot!(Z1[1,:], Z1[2,:], linewidth=2, label="Z1 drone", aspect_ratio=:equal)
+# plot!(Z1[7,:], Z1[8,:], linewidth=2, label="Z1 tip", aspect_ratio=:equal)
+# num_steps = length(Z[1,:])
+# plot!([x[7] for x in xref[1:num_steps]], [x[8] for x in xref[1:num_steps]], linewidth=2, label="tip reference", aspect_ratio=:equal)
+# # plot!(U_real[1,:], U_real[2,:], linewidth=2, label="real control", aspect_ratio=:equal)
