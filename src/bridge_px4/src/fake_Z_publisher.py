@@ -24,7 +24,7 @@ class GCS:
         
         # fake data
         self.i = 1
-        mat_file = '/home/oem/flyingSysID/fig8_sim_real_history_size_5.mat'  # Replace 'your_mat_file.mat' with the actual file path
+        mat_file = '/home/oem/flyingSysID/fig8_sim_real_history_size_5.mat'  
         mat_data = scipy.io.loadmat(mat_file)
         self.Z_all = mat_data['Z_all']
 

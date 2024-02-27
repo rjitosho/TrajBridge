@@ -10,6 +10,7 @@ rostypegen()
 using .geometry_msgs.msg
 using .std_msgs.msg
 using Plots
+using LinearAlgebra
 
 
 function callback(msg::Float32MultiArray, current_z)
@@ -95,6 +96,26 @@ function plot_current_motion_plan(x_sol, u_sol, xref, num_steps, i)
     display(h)
 end
 
+function safety_check(current_koopman_state)
+    # if tip measurement has changed too much
+    current_tip_position = current_koopman_state[7:9]
+    last_tip_position = current_koopman_state[9 .+ (7:9)]
+    if norm(current_tip_position - last_tip_position) > 0.5
+        print("SAFETY CHECK FAILED: tip measurement changed too much\n")
+        return false
+    end
+
+    # if tip measurement is too far from drone
+    current_drone_position = current_koopman_state[1:3]
+    if norm(current_drone_position - current_tip_position) > 1.0
+        print("SAFETY CHECK FAILED: tip too far from drone\n")
+        return false
+    end
+
+    return true
+
+end
+
 function loop(pos_pub_obj, att_pub_obj, mpc_data, tip_measurement, drone_measurement, current_koopman_state; num_steps = 200, override=true)
     i = 0
     x_sol, u_sol = mpc_data.x_sol, mpc_data.u_sol
@@ -111,21 +132,29 @@ function loop(pos_pub_obj, att_pub_obj, mpc_data, tip_measurement, drone_measure
         t_now = RobotOS.now()
         
         if ! override
-            # update_state!(x_sol[2], tip_measurement, drone_measurement)
             x_sol[2] .= current_koopman_state
+        end
+
+        if ! safety_check(current_koopman_state)
+            break
         end
 
         # print("State: ", round.(x_sol[2][1:3]; digits=4), "\n")
         # update_problem!(mpc_data.solver, mpc_data.objectives[i], mpc_data.model, x_sol, [u_sol[2:end]..., u_sol[end]])
         update_problem!(mpc_data.solver, mpc_data.objectives[i+5], mpc_data.model, x_sol, mpc_data.uref[(i-1) .+ (1:length(mpc_data.model))])
-        # update_problem!(mpc_data.solver, mpc_data.objectives[i], mpc_data.model, x_sol, mpc_data.uref[1:24])
         
         x_sol, u_sol = get_trajectory(mpc_data.solver)
 
         publish_pose_cmd(pos_pub_obj, att_pub_obj, RobotOS.now(), i, u_sol[1])
 
-        print("Iteration: ", i, " Time: ", (RobotOS.now() - t_now).nsecs/10^9, "\n")
-        
+        # runtime
+        solve_time = (RobotOS.now() - t_now).nsecs/10^9
+        print("Iteration: ", i, " Time: ", solve_time, "\n")
+        if solve_time > 0.05
+            print("SOLVE TIME TOO LONG\n")
+            break
+        end
+
         # X_drone[1, i] = drone_measurement.msg.pose.position.x
         # X_drone[2, i] = drone_measurement.msg.pose.position.y
         # X_drone[3, i] = drone_measurement.msg.pose.position.z
