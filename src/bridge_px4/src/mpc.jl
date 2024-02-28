@@ -97,6 +97,8 @@ function plot_current_motion_plan(x_sol, u_sol, xref, num_steps, i)
 end
 
 function safety_check(current_koopman_state)
+    # return true # disable safety check
+
     # if tip measurement has changed too much
     current_tip_position = current_koopman_state[7:9]
     last_tip_position = current_koopman_state[9 .+ (7:9)]
@@ -107,7 +109,7 @@ function safety_check(current_koopman_state)
 
     # if tip measurement is too far from drone
     current_drone_position = current_koopman_state[1:3]
-    if norm(current_drone_position - current_tip_position) > 1.0
+    if norm(current_drone_position - current_tip_position) > 1.2
         print("SAFETY CHECK FAILED: tip too far from drone\n")
         return false
     end
@@ -126,7 +128,10 @@ function loop(pos_pub_obj, att_pub_obj, mpc_data, tip_measurement, drone_measure
     X_tip = zeros(3, num_steps)
     # reset_state!(x_sol[2])
     # reset_measurement!(tip_measurement, drone_measurement)
-
+    
+    # wait for the first koopman_state
+    rossleep(Rate(1.0))
+    
     loop_rate = Rate(20.0)
     for i in 1:num_steps
         t_now = RobotOS.now()
@@ -185,7 +190,7 @@ init_node("mpc_node")
 # Subscriber{PoseStamped}("/drone5/mavros/vision_pose/pose", callback, (drone_measurement,), queue_size=1)
 
 current_koopman_state = zeros(45)
-Subscriber{Float32MultiArray}("/z_flying_vine", callback, (current_koopman_state,), queue_size=1)
+Subscriber{Float32MultiArray}("/koopman_state", callback, (current_koopman_state,), queue_size=1)
 
 # publishers
 pos_pub = Publisher{PointStamped}("/gcs/setpoint/position2",queue_size=1)
@@ -243,3 +248,6 @@ end
 # num_steps = length(Z[1,:])
 # plot!([x[7] for x in xref[1:num_steps]], [x[8] for x in xref[1:num_steps]], linewidth=2, label="tip reference", aspect_ratio=:equal)
 # # plot!(U_real[1,:], U_real[2,:], linewidth=2, label="real control", aspect_ratio=:equal)
+
+
+# [current_koopman_state[1:9] current_koopman_state[10:18] current_koopman_state[19:27] current_koopman_state[28:36] current_koopman_state[37:45]]

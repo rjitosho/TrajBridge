@@ -8,7 +8,7 @@ class StatePublisher:
     def __init__(self):
         rospy.init_node('state_publisher')
         
-        self.state_pub = rospy.Publisher('koopman_state', Float32MultiArray, queue_size=10)
+        self.state_pub = rospy.Publisher('/koopman_state', Float32MultiArray, queue_size=10)
         
         self.drone_pose_sub = rospy.Subscriber('/drone5/mavros/local_position/pose', PoseStamped, self.drone_pose_callback)
         self.tip_pose_sub = rospy.Subscriber('/vrpn_client_node/tip/pose', PoseStamped, self.tip_pose_callback)
@@ -55,7 +55,7 @@ class StatePublisher:
         # Publish the state at 20 Hz
         while not rospy.is_shutdown():           
             # Update the state buffer
-            self.state_buffer = self.get_current_configuration() + self.state_buffer[9:]
+            self.state_buffer = self.get_current_configuration() + self.state_buffer[:-9]
             
             # Publish the state
             self.state_pub.publish(Float32MultiArray(data=self.state_buffer))

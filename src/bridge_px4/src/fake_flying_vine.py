@@ -15,7 +15,7 @@ class GCS:
 
         # Publishers
         self.tip_pub = rospy.Publisher("/vrpn_client_node/tip/pose",PoseStamped,queue_size=1)
-        self.drone_pub = rospy.Publisher("/drone5/mavros/vision_pose/pose",PoseStamped,queue_size=1)
+        self.drone_pub = rospy.Publisher("/drone5/mavros/local_position/pose",PoseStamped,queue_size=1)
 
         # Subscribers
         rospy.Subscriber("/gcs/setpoint/position2", PointStamped, self.gcs_setpoint_position_cb)
