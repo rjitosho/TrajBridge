@@ -121,22 +121,28 @@ function safety_check(current_koopman_state)
 
 end
 
-function loop(pos_pub_obj, att_pub_obj, pos_pub_obj2, att_pub_obj2, mpc_data, current_koopman_state; num_steps = 200, override=true, plot_motion_plan=false, initial_run=false)
+function loop(pos_pub_obj, att_pub_obj, pos_pub_obj2, att_pub_obj2, mpc_data, current_koopman_state; alpha = .2, num_steps = 200, override=true, plot_motion_plan=false, initial_run=false)
     i = 0
     x_sol, u_sol = mpc_data.x_sol, mpc_data.u_sol
     U = zeros(3, num_steps)
+    Uf = zeros(3, num_steps)
     Z = zeros(45, num_steps)
     Z1 = zeros(45, num_steps)
     X_drone = zeros(3, num_steps)
     X_tip = zeros(3, num_steps)
-    # reset_state!(x_sol[2])
-    # reset_measurement!(tip_measurement, drone_measurement)
+    
+    u_filtered = [0.0, 0.0, 1.5]    
 
     # open CSV for commands to send to real system
     df = CSV.read("/home/oem/StanfordMSL/TrajBridge/src/bridge_px4/trajectories/EE_fig8_10s_motionplan.csv", DataFrame)
 
-    # wait for the first koopman_state
+    # reset and wait for the first koopman_state
+    current_koopman_state .= 0.0
     rossleep(3.0)
+    if (current_koopman_state[3] == 0.0) && !initial_run
+        print("Koopman state not received\n")
+        return 0,0,0,0,0,0
+    end
     
     loop_rate = Rate(20.0)
     for i in 1:num_steps
@@ -156,8 +162,14 @@ function loop(pos_pub_obj, att_pub_obj, pos_pub_obj2, att_pub_obj2, mpc_data, cu
         
         x_sol, u_sol = get_trajectory(mpc_data.solver)
 
-        publish_pose_cmd(pos_pub_obj, att_pub_obj, RobotOS.now(), i, df[1:3, i])
-        publish_pose_cmd(pos_pub_obj2, att_pub_obj2, RobotOS.now(), i, u_sol[1])
+        u_filtered = alpha * u_sol[1] + (1 - alpha) * u_filtered
+
+        if override
+            publish_pose_cmd(pos_pub_obj, att_pub_obj, RobotOS.now(), i, df[1:3, i])
+            publish_pose_cmd(pos_pub_obj2, att_pub_obj2, RobotOS.now(), i, u_filtered)
+        else
+            publish_pose_cmd(pos_pub_obj, att_pub_obj, RobotOS.now(), i, u_filtered)
+        end
 
         # runtime
         solve_time = (RobotOS.now() - t_now).nsecs/10^9
@@ -176,6 +188,7 @@ function loop(pos_pub_obj, att_pub_obj, pos_pub_obj2, att_pub_obj2, mpc_data, cu
         Z1[:, i] = x_sol[1]
         Z[:, i] = x_sol[2]
         U[:, i] = u_sol[1]
+        Uf[:, i] = u_filtered
 
         if plot_motion_plan
             plot_current_motion_plan(x_sol, u_sol, mpc_data.xref, length(x_sol), i)
@@ -186,7 +199,7 @@ function loop(pos_pub_obj, att_pub_obj, pos_pub_obj2, att_pub_obj2, mpc_data, cu
         rossleep(loop_rate)
     end
 
-    return Z, U, X_drone, X_tip, Z1
+    return Z, U, X_drone, X_tip, Z1, Uf
 end
 
 init_node("mpc_node")
@@ -220,6 +233,8 @@ T2 = 400
 xref, uref = gen_Z_from_tip(T2, 5, 200) #T2, history_size, period
 # plot_reference(xref, uref)
 problem_data = MPC(T, T2, A_full, B_full, xref, uref);
+problem_data.solver.options.max_iterations = 4
+problem_data.solver.options.max_dual_updates = 2
 print("Problem data initialized\n")
 
 # display(plot(U[1,:], U[2,:], linewidth=2, label="control", aspect_ratio=:equal))
@@ -244,7 +259,7 @@ function plot_results(show_control=false, show_reference=false)
     display(h)
 end
 
-Z, U, X_drone, X_tip, Z1 = loop(pos_pub, att_pub, pos_pub2, att_pub2, problem_data, current_koopman_state, num_steps=190, override=false, initial_run=true);
+Z, U, X_drone, X_tip, Z1, Uf = loop(pos_pub, att_pub, pos_pub2, att_pub2, problem_data, current_koopman_state, num_steps=190, override=false, initial_run=true);
 
 
 # # Load real control
