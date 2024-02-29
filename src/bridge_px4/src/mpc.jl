@@ -48,45 +48,6 @@ function publish_pose_cmd(pos_pub_obj, att_pub_obj, t_now, i, u)
     
 end
 
-function update_state!(x, tip_measurement, drone_measurement)
-    # shift the old configurations
-    x[10:end] = x[1:end-9]
-    
-    # fill in the current configuration
-    x[1:3] = [drone_measurement.msg.pose.position.x, drone_measurement.msg.pose.position.y, drone_measurement.msg.pose.position.z]
-    x[4:6] = [drone_measurement.msg.pose.orientation.x, drone_measurement.msg.pose.orientation.y, drone_measurement.msg.pose.orientation.z]
-    x[7:9] = [tip_measurement.msg.pose.position.x, tip_measurement.msg.pose.position.y, tip_measurement.msg.pose.position.z]
-    return
-end
-
-function reset_state!(x)
-    x[1:9:end] .= 0.011
-    x[2:9:end] .= 0.017
-    x[3:9:end] .= 1.477
-
-    x[4:9:end] .= 0.130
-    x[5:9:end] .= -0.121
-    x[6:9:end] .= -0.007
-
-    x[7:9:end] .= 0.020
-    x[8:9:end] .= -0.026
-    x[9:9:end] .= 0.501
-end
-
-function reset_measurement!(tip_measurement, drone_measurement)
-    drone_measurement.msg.pose.position.x = 0.011
-    drone_measurement.msg.pose.position.y = 0.017
-    drone_measurement.msg.pose.position.z = 1.477
-    
-    drone_measurement.msg.pose.orientation.x = 0.130
-    drone_measurement.msg.pose.orientation.y = -0.121
-    drone_measurement.msg.pose.orientation.z = -0.007
-    
-    tip_measurement.msg.pose.position.x = 0.020
-    tip_measurement.msg.pose.position.y = -0.026
-    tip_measurement.msg.pose.position.z = 0.501
-end
-
 function plot_current_motion_plan(x_sol, u_sol, xref, num_steps, i)
     h = plot([x[7] for x in xref[i .+ (1:num_steps)]], [x[8] for x in xref[i .+ (1:num_steps)]], linewidth=2, label="tip_desired", aspect_ratio=:equal)
     plot!([x[7] for x in x_sol], [x[8] for x in x_sol], linewidth=2, label="tip_plan", aspect_ratio=:equal)
@@ -123,13 +84,13 @@ end
 
 function loop(pos_pub_obj, att_pub_obj, pos_pub_obj2, att_pub_obj2, mpc_data, current_koopman_state; alpha = .2, num_steps = 200, override=true, plot_motion_plan=false, initial_run=false)
     i = 0
+    
     x_sol, u_sol = mpc_data.x_sol, mpc_data.u_sol
+    
     U = zeros(3, num_steps)
     Uf = zeros(3, num_steps)
-    Z = zeros(45, num_steps)
     Z1 = zeros(45, num_steps)
-    X_drone = zeros(3, num_steps)
-    X_tip = zeros(3, num_steps)
+    Z2 = zeros(45, num_steps)
     
     u_filtered = [0.0, 0.0, 1.5]    
 
@@ -179,14 +140,8 @@ function loop(pos_pub_obj, att_pub_obj, pos_pub_obj2, att_pub_obj2, mpc_data, cu
             break
         end
 
-        # X_drone[1, i] = drone_measurement.msg.pose.position.x
-        # X_drone[2, i] = drone_measurement.msg.pose.position.y
-        # X_drone[3, i] = drone_measurement.msg.pose.position.z
-        # X_tip[1, i] = tip_measurement.msg.pose.position.x
-        # X_tip[2, i] = tip_measurement.msg.pose.position.y
-        # X_tip[3, i] = tip_measurement.msg.pose.position.z
         Z1[:, i] = x_sol[1]
-        Z[:, i] = x_sol[2]
+        Z2[:, i] = x_sol[2]
         U[:, i] = u_sol[1]
         Uf[:, i] = u_filtered
 
@@ -199,18 +154,13 @@ function loop(pos_pub_obj, att_pub_obj, pos_pub_obj2, att_pub_obj2, mpc_data, cu
         rossleep(loop_rate)
     end
 
-    return Z, U, X_drone, X_tip, Z1, Uf
+    return Z1, Z2, U, Uf
 end
 
+# Initialize ROS node
 init_node("mpc_node")
 
-# subscribers
-# drone_measurement = PoseMeasurement(PoseStamped())
-# tip_measurement = PoseMeasurement(PoseStamped())
-
-# Subscriber{PoseStamped}("/vrpn_client_node/tip/pose", callback, (tip_measurement,), queue_size=1)
-# Subscriber{PoseStamped}("/drone5/mavros/vision_pose/pose", callback, (drone_measurement,), queue_size=1)
-
+# subscriber
 current_koopman_state = zeros(45)
 Subscriber{Float32MultiArray}("/koopman_state", callback, (current_koopman_state,), queue_size=1)
 
@@ -230,7 +180,7 @@ close(mat_file)
 # MPC loop
 T = 25
 T2 = 400
-xref, uref = gen_Z_from_tip(T2, 5, 200) #T2, history_size, period
+xref, uref = gen_Z_from_tip_ramp(T2, 5) #T2, history_size
 # plot_reference(xref, uref)
 problem_data = MPC(T, T2, A_full, B_full, xref, uref);
 problem_data.solver.options.max_iterations = 4
@@ -241,25 +191,27 @@ print("Problem data initialized\n")
 # display(plot(Z[1,:], Z[2,:], linewidth=2, label="position", aspect_ratio=:equal))
 # display(plot(X[1,:], X[2,:], linewidth=2, label="drone", aspect_ratio=:equal))
 
-function plot_results(show_control=false, show_reference=false)
+function plot_results(show_control=true, show_reference=true, show_drone=false)
     h = plot([0],[0])
-    plot!(Z[1,:], Z[2,:], linewidth=2, label="Z drone", aspect_ratio=:equal)
-    plot!(Z[7,:], Z[8,:], linewidth=2, label="Z tip", aspect_ratio=:equal)
-    plot!(Z1[1,:], Z1[2,:], linewidth=2, label="Z1 drone", aspect_ratio=:equal)
-    plot!(Z1[7,:], Z1[8,:], linewidth=2, label="Z1 tip", aspect_ratio=:equal)
-    plot!(X_drone[1,:], X[2,:], linewidth=2, label="drone", aspect_ratio=:equal, linestyle=:dash)
-    plot!(X_tip[1,:], X_tip[2,:], linewidth=2, label="tip", aspect_ratio=:equal, linestyle=:dash)
+    plot!(Z2[7,:], Z2[8,:], linewidth=2, label="Z2 tip", aspect_ratio=:equal)
+    
+    if show_drone
+        plot!(Z2[1,:], Z2[2,:], linewidth=2, label="Z2 drone", aspect_ratio=:equal)
+    end
+    
     if show_control
         plot!(U[1,:], U[2,:], linewidth=2, label="control", aspect_ratio=:equal)
+        plot!(Uf[1,:], Uf[2,:], linewidth=2, label="filtered control", aspect_ratio=:equal)
     end
+
     if show_reference
-        num_steps = length(Z[1,:])
+        num_steps = length(Z1[1,:])
         plot!([x[7] for x in xref[1:num_steps]], [x[8] for x in xref[1:num_steps]], linewidth=2, label="tip reference", aspect_ratio=:equal)
     end
     display(h)
 end
 
-Z, U, X_drone, X_tip, Z1, Uf = loop(pos_pub, att_pub, pos_pub2, att_pub2, problem_data, current_koopman_state, num_steps=190, override=false, initial_run=true);
+Z1, Z2, U, Uf = loop(pos_pub, att_pub, pos_pub2, att_pub2, problem_data, current_koopman_state, num_steps=190, override=false, initial_run=true);
 
 
 # # Load real control
