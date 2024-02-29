@@ -11,6 +11,7 @@ using .geometry_msgs.msg
 using .std_msgs.msg
 using Plots
 using LinearAlgebra
+using CSV, DataFrames
 
 
 function callback(msg::Float32MultiArray, current_z)
@@ -30,7 +31,7 @@ function publish_pose_cmd(pos_pub_obj, att_pub_obj, t_now, i, u)
 
     pos_msg.point.x = clamp(u[1], -2.0, 2.0)
     pos_msg.point.y = clamp(u[2], -2.0, 2.0)
-    pos_msg.point.z = clamp(u[3], -2.0, 2.0)
+    pos_msg.point.z = clamp(u[3], 1.0, 2.0)
 
     # Attitude
     att_msg.header.stamp = t_now
@@ -104,13 +105,15 @@ function safety_check(current_koopman_state)
     last_tip_position = current_koopman_state[9 .+ (7:9)]
     if norm(current_tip_position - last_tip_position) > 0.5
         print("SAFETY CHECK FAILED: tip measurement changed too much\n")
+        print("Current: ", current_tip_position, " Last: ", last_tip_position, "\n")
         return false
     end
 
     # if tip measurement is too far from drone
     current_drone_position = current_koopman_state[1:3]
-    if norm(current_drone_position - current_tip_position) > 1.2
+    if norm(current_drone_position - current_tip_position) > 2.5
         print("SAFETY CHECK FAILED: tip too far from drone\n")
+        print("Tip: ", current_tip_position, " Drone: ", current_drone_position, "\n")
         return false
     end
 
@@ -118,7 +121,7 @@ function safety_check(current_koopman_state)
 
 end
 
-function loop(pos_pub_obj, att_pub_obj, mpc_data, tip_measurement, drone_measurement, current_koopman_state; num_steps = 200, override=true)
+function loop(pos_pub_obj, att_pub_obj, pos_pub_obj2, att_pub_obj2, mpc_data, current_koopman_state; num_steps = 200, override=true, plot_motion_plan=false, initial_run=false)
     i = 0
     x_sol, u_sol = mpc_data.x_sol, mpc_data.u_sol
     U = zeros(3, num_steps)
@@ -128,9 +131,12 @@ function loop(pos_pub_obj, att_pub_obj, mpc_data, tip_measurement, drone_measure
     X_tip = zeros(3, num_steps)
     # reset_state!(x_sol[2])
     # reset_measurement!(tip_measurement, drone_measurement)
-    
+
+    # open CSV for commands to send to real system
+    df = CSV.read("/home/oem/StanfordMSL/TrajBridge/src/bridge_px4/trajectories/EE_fig8_10s_motionplan.csv", DataFrame)
+
     # wait for the first koopman_state
-    rossleep(Rate(1.0))
+    rossleep(3.0)
     
     loop_rate = Rate(20.0)
     for i in 1:num_steps
@@ -150,12 +156,13 @@ function loop(pos_pub_obj, att_pub_obj, mpc_data, tip_measurement, drone_measure
         
         x_sol, u_sol = get_trajectory(mpc_data.solver)
 
-        publish_pose_cmd(pos_pub_obj, att_pub_obj, RobotOS.now(), i, u_sol[1])
+        publish_pose_cmd(pos_pub_obj, att_pub_obj, RobotOS.now(), i, df[1:3, i])
+        publish_pose_cmd(pos_pub_obj2, att_pub_obj2, RobotOS.now(), i, u_sol[1])
 
         # runtime
         solve_time = (RobotOS.now() - t_now).nsecs/10^9
         print("Iteration: ", i, " Time: ", solve_time, "\n")
-        if solve_time > 0.05
+        if (solve_time > 0.05) && !initial_run
             print("SOLVE TIME TOO LONG\n")
             break
         end
@@ -170,7 +177,9 @@ function loop(pos_pub_obj, att_pub_obj, mpc_data, tip_measurement, drone_measure
         Z[:, i] = x_sol[2]
         U[:, i] = u_sol[1]
 
-        plot_current_motion_plan(x_sol, u_sol, mpc_data.xref, length(x_sol), i)
+        if plot_motion_plan
+            plot_current_motion_plan(x_sol, u_sol, mpc_data.xref, length(x_sol), i)
+        end
 
         # readline()
 
@@ -193,8 +202,11 @@ current_koopman_state = zeros(45)
 Subscriber{Float32MultiArray}("/koopman_state", callback, (current_koopman_state,), queue_size=1)
 
 # publishers
-pos_pub = Publisher{PointStamped}("/gcs/setpoint/position2",queue_size=1)
-att_pub = Publisher{QuaternionStamped}("/gcs/setpoint/attitude2",queue_size=1)
+pos_pub = Publisher{PointStamped}("/gcs/setpoint/position",queue_size=1)
+att_pub = Publisher{QuaternionStamped}("/gcs/setpoint/attitude",queue_size=1)
+
+pos_pub2 = Publisher{PointStamped}("/gcs/setpoint/position2",queue_size=1)
+att_pub2 = Publisher{QuaternionStamped}("/gcs/setpoint/attitude2",queue_size=1)
 
 # Load dynamics
 mat_file = matopen("/home/oem/flyingSysID/deflated_sysID_nice-resample_dt0-05_history-size-5.mat")
@@ -209,8 +221,6 @@ xref, uref = gen_Z_from_tip(T2, 5, 200) #T2, history_size, period
 # plot_reference(xref, uref)
 problem_data = MPC(T, T2, A_full, B_full, xref, uref);
 print("Problem data initialized\n")
-# Z, U, X, Z1 = loop(pos_pub, att_pub, problem_data, tip_measurement, drone_measurement, 
-#             num_steps=10, override=false)
 
 # display(plot(U[1,:], U[2,:], linewidth=2, label="control", aspect_ratio=:equal))
 # display(plot(Z[1,:], Z[2,:], linewidth=2, label="position", aspect_ratio=:equal))
@@ -234,7 +244,7 @@ function plot_results(show_control=false, show_reference=false)
     display(h)
 end
 
-# Z, U, X_drone, X_tip, Z1 = loop(pos_pub, att_pub, problem_data, 1, 1, current_koopman_state, num_steps=14, override=false);
+Z, U, X_drone, X_tip, Z1 = loop(pos_pub, att_pub, pos_pub2, att_pub2, problem_data, current_koopman_state, num_steps=190, override=false, initial_run=true);
 
 
 # # Load real control
