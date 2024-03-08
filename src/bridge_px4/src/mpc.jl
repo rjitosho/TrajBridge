@@ -211,7 +211,7 @@ function plot_results(show_control=true, show_reference=true, show_drone=false)
     display(h)
 end
 
-Z1, Z2, U, Uf = loop(pos_pub, att_pub, pos_pub2, att_pub2, problem_data, current_koopman_state, num_steps=190, override=false, initial_run=true);
+Z1, Z2, U, Uf = loop(pos_pub, att_pub, pos_pub2, att_pub2, problem_data, current_koopman_state, num_steps=270, override=false, initial_run=true);
 
 
 # # Load real control

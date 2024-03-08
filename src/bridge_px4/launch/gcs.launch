@@ -7,7 +7,7 @@
             <param name="laps" value="1"/>
       </node>
 
-      <!-- <node pkg="rosbag" type="record" name="rosbag_record_gcs"
+      <node pkg="rosbag" type="record" name="rosbag_record_gcs"
             args="/drone5/mavros/vision_pose/pose 
                   /drone5/mavros/local_position/pose
                   /drone5/mavros/setpoint_position/local
@@ -16,5 +16,5 @@
                   /vrpn_client_node/tip/pose
                   /drone5/mavros/imu/data
                   /gcs/setpoint/position
-                  /gcs/setpoint/attitude"/> -->
+                  /gcs/setpoint/attitude"/>
 </launch>
