@@ -180,7 +180,9 @@ close(mat_file)
 # MPC loop
 T = 25
 T2 = 400
-xref, uref = gen_Z_from_tip_ramp(T2, 5) #T2, history_size
+xref, uref = gen_Z_from_tip_ramp(T, 5; initial_period=300, final_period=6, ramp_duration=5) #T, history_size
+# xref, uref = gen_Z_from_tip_ramp(T, 5; initial_period=300, final_period=10, ramp_duration=5) #T, history_size
+
 # plot_reference(xref, uref)
 problem_data = MPC(T, T2, A_full, B_full, xref, uref);
 problem_data.solver.options.max_iterations = 4
