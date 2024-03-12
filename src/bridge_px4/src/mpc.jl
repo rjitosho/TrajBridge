@@ -119,7 +119,7 @@ function loop(pos_pub_obj, att_pub_obj, pos_pub_obj2, att_pub_obj2, mpc_data, cu
 
         # print("State: ", round.(x_sol[2][1:3]; digits=4), "\n")
         # update_problem!(mpc_data.solver, mpc_data.objectives[i], mpc_data.model, x_sol, [u_sol[2:end]..., u_sol[end]])
-        update_problem!(mpc_data.solver, mpc_data.objectives[i+5], mpc_data.model, x_sol, mpc_data.uref[(i-1) .+ (1:length(mpc_data.model))])
+        update_problem!(mpc_data.solver, mpc_data.objectives[i], mpc_data.model, x_sol, mpc_data.uref[(i-1) .+ (1:length(mpc_data.model))])
         
         x_sol, u_sol = get_trajectory(mpc_data.solver)
 
@@ -157,6 +157,26 @@ function loop(pos_pub_obj, att_pub_obj, pos_pub_obj2, att_pub_obj2, mpc_data, cu
     return Z1, Z2, U, Uf
 end
 
+function plot_results(show_control=true, show_reference=true, show_drone=false)
+    h = plot([0],[0])
+    plot!(Z2[7,:], Z2[8,:], linewidth=2, label="Z2 tip", aspect_ratio=:equal)
+    
+    if show_drone
+        plot!(Z2[1,:], Z2[2,:], linewidth=2, label="Z2 drone", aspect_ratio=:equal)
+    end
+    
+    if show_control
+        plot!(U[1,:], U[2,:], linewidth=2, label="control", aspect_ratio=:equal)
+        plot!(Uf[1,:], Uf[2,:], linewidth=2, label="filtered control", aspect_ratio=:equal)
+    end
+
+    if show_reference
+        num_steps = length(Z1[1,:])
+        plot!([x[7] for x in xref[1:num_steps]], [x[8] for x in xref[1:num_steps]], linewidth=2, label="tip reference", aspect_ratio=:equal)
+    end
+    display(h)
+end
+
 # Initialize ROS node
 init_node("mpc_node")
 
@@ -179,9 +199,13 @@ close(mat_file)
 
 # MPC loop
 T = 25
-T2 = 400
-xref, uref = gen_Z_from_tip_ramp(T2, 5; initial_period=300, final_period=6, ramp_duration=5) #T, history_size
-# xref, uref = gen_Z_from_tip_ramp(T2, 5; initial_period=300, final_period=10, ramp_duration=5) #T, history_size
+T2 = 314
+# xref, uref = gen_Z_from_tip_ramp(T2, 5; initial_period=300, final_period=6, ramp_duration=5) #T, history_size
+xref, uref = gen_Z_from_tip_ramp(T2, 5; initial_period=300, final_period=10, ramp_duration=5) #T, history_size
+
+# use optimized uref
+df = CSV.read("/home/oem/StanfordMSL/TrajBridge/src/bridge_px4/trajectories/EE_fig8_10s_ramp_MPCref.csv", DataFrame)
+uref = [x[1:3] for x in eachcol(df)]
 
 # plot_reference(xref, uref)
 problem_data = MPC(T, T2, A_full, B_full, xref, uref);
@@ -192,26 +216,6 @@ print("Problem data initialized\n")
 # display(plot(U[1,:], U[2,:], linewidth=2, label="control", aspect_ratio=:equal))
 # display(plot(Z[1,:], Z[2,:], linewidth=2, label="position", aspect_ratio=:equal))
 # display(plot(X[1,:], X[2,:], linewidth=2, label="drone", aspect_ratio=:equal))
-
-function plot_results(show_control=true, show_reference=true, show_drone=false)
-    h = plot([0],[0])
-    plot!(Z2[7,:], Z2[8,:], linewidth=2, label="Z2 tip", aspect_ratio=:equal)
-    
-    if show_drone
-        plot!(Z2[1,:], Z2[2,:], linewidth=2, label="Z2 drone", aspect_ratio=:equal)
-    end
-    
-    if show_control
-        plot!(U[1,:], U[2,:], linewidth=2, label="control", aspect_ratio=:equal)
-        plot!(Uf[1,:], Uf[2,:], linewidth=2, label="filtered control", aspect_ratio=:equal)
-    end
-
-    if show_reference
-        num_steps = length(Z1[1,:])
-        plot!([x[7] for x in xref[1:num_steps]], [x[8] for x in xref[1:num_steps]], linewidth=2, label="tip reference", aspect_ratio=:equal)
-    end
-    display(h)
-end
 
 Z1, Z2, U, Uf = loop(pos_pub, att_pub, pos_pub2, att_pub2, problem_data, current_koopman_state, alpha = .25, num_steps=220, override=false, initial_run=true);
 # Z1, Z2, U, Uf = loop(pos_pub, att_pub, pos_pub2, att_pub2, problem_data, current_koopman_state, num_steps=270, override=false, initial_run=true);
