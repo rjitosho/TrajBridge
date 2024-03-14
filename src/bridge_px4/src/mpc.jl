@@ -209,6 +209,7 @@ uref = [x[1:3] for x in eachcol(df)]
 
 # plot_reference(xref, uref)
 problem_data = MPC(T, T2, A_full, B_full, xref, uref);
+# problem_data = MPC(T, T2, A_full, B_full, xref, uref; tip_cost = [5.0, 5.0, 10.0], u_cost = [1.0, 1.0, 0.5]);
 problem_data.solver.options.max_iterations = 4
 problem_data.solver.options.max_dual_updates = 2
 print("Problem data initialized\n")
