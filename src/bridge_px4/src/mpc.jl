@@ -225,11 +225,13 @@ df = CSV.read("/home/oem/StanfordMSL/TrajBridge/src/bridge_px4/trajectories/EE_f
 
 uref = [x[1:3] for x in eachcol(df)]
 # plot_reference(xref, uref)
-problem_data = MPC(T, T2, A_full, B_full, xref, uref);
-# problem_data = MPC(T, T2, A_full, B_full, xref, uref; tip_cost = [5.0, 5.0, 10.0], u_cost = [1.0, 1.0, 0.5]);
+# problem_data = MPC(T, T2, A_full, B_full, xref, uref);
+problem_data = MPC(T, T2, A_full, B_full, xref, uref; tip_cost = [1.0, 1.0, 30.0], u_cost = [10.0, 10.0, 1.0]);
 problem_data.solver.options.max_iterations = 4
 problem_data.solver.options.max_dual_updates = 2
 print("Problem data initialized\n")
 
 Z1, Z2, U, Uf = loop(pos_pub, att_pub, pos_pub2, att_pub2, problem_data, current_koopman_state, alpha = .25, num_steps=num_steps, override=false, initial_run=true);
 # Z1, Z2, U, Uf = loop(pos_pub, att_pub, pos_pub2, att_pub2, problem_data, current_koopman_state, num_steps=270, override=false, initial_run=true);
+
+# change_costs!(problem_data, T2; tip_cost = [1.0, 1.0, 30.0], u_cost = [10.0, 10.0, 1.0]);
