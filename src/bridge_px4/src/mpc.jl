@@ -197,16 +197,33 @@ A_full = read(mat_file, "A_full")
 B_full = read(mat_file, "B_full")
 close(mat_file)
 
-# MPC loop
+# MPC horizon and runtime
 T = 25
-T2 = 314
+
+# 4 SECOND PERIOD
+T2 = 199
+num_steps = 157
+xref, uref = gen_Z_from_tip_ramp(T2, 5; initial_period=300, final_period=4, ramp_duration=4) #T, history_size
+df = CSV.read("/home/oem/StanfordMSL/TrajBridge/src/bridge_px4/trajectories/EE_fig8_4s_ramp_MPCref.csv", DataFrame)
+
+# 6 SECOND PERIOD
+# T2 = 
 # xref, uref = gen_Z_from_tip_ramp(T2, 5; initial_period=300, final_period=6, ramp_duration=5) #T, history_size
-xref, uref = gen_Z_from_tip_ramp(T2, 5; initial_period=300, final_period=10, ramp_duration=5) #T, history_size
+# df = CSV.read("/home/oem/StanfordMSL/TrajBridge/src/bridge_px4/trajectories/EE_fig8_6s_ramp_MPCref.csv", DataFrame)
 
-# use optimized uref
-df = CSV.read("/home/oem/StanfordMSL/TrajBridge/src/bridge_px4/trajectories/EE_fig8_10s_ramp_MPCref.csv", DataFrame)
+# 10 SECOND PERIOD
+# T2 =
+# xref, uref = gen_Z_from_tip_ramp(T2, 5; initial_period=300, final_period=10, ramp_duration=5) #T, history_size
+# df = CSV.read("/home/oem/StanfordMSL/TrajBridge/src/bridge_px4/trajectories/EE_fig8_10s_ramp_MPCref.csv", DataFrame)
+
+# LONG HORIZON TEST
+# T2 = 999
+# num_steps = 999-26
+# xref, uref = gen_Z_from_tip_ramp(T2, 5; initial_period=300, final_period=6, ramp_duration=5) #T, history_size
+# df = CSV.read("/home/oem/StanfordMSL/TrajBridge/src/bridge_px4/trajectories/EE_fig8_6s_ramp_OLref_1ksteps.csv", DataFrame)
+
+
 uref = [x[1:3] for x in eachcol(df)]
-
 # plot_reference(xref, uref)
 problem_data = MPC(T, T2, A_full, B_full, xref, uref);
 # problem_data = MPC(T, T2, A_full, B_full, xref, uref; tip_cost = [5.0, 5.0, 10.0], u_cost = [1.0, 1.0, 0.5]);
@@ -214,25 +231,5 @@ problem_data.solver.options.max_iterations = 4
 problem_data.solver.options.max_dual_updates = 2
 print("Problem data initialized\n")
 
-# display(plot(U[1,:], U[2,:], linewidth=2, label="control", aspect_ratio=:equal))
-# display(plot(Z[1,:], Z[2,:], linewidth=2, label="position", aspect_ratio=:equal))
-# display(plot(X[1,:], X[2,:], linewidth=2, label="drone", aspect_ratio=:equal))
-
-Z1, Z2, U, Uf = loop(pos_pub, att_pub, pos_pub2, att_pub2, problem_data, current_koopman_state, alpha = .25, num_steps=220, override=false, initial_run=true);
+Z1, Z2, U, Uf = loop(pos_pub, att_pub, pos_pub2, att_pub2, problem_data, current_koopman_state, alpha = .25, num_steps=num_steps, override=false, initial_run=true);
 # Z1, Z2, U, Uf = loop(pos_pub, att_pub, pos_pub2, att_pub2, problem_data, current_koopman_state, num_steps=270, override=false, initial_run=true);
-
-
-# # Load real control
-# mat_file = matopen("/home/oem/flyingSysID/fig8_sim_real_history_size_5.mat")
-# U_real = read(mat_file, "U")
-# close(mat_file)
-
-# plot(U[1,:], U[2,:], linewidth=2, label="control", aspect_ratio=:equal)
-# # plot!(Z1[1,:], Z1[2,:], linewidth=2, label="Z1 drone", aspect_ratio=:equal)
-# plot!(Z1[7,:], Z1[8,:], linewidth=2, label="Z1 tip", aspect_ratio=:equal)
-# num_steps = length(Z[1,:])
-# plot!([x[7] for x in xref[1:num_steps]], [x[8] for x in xref[1:num_steps]], linewidth=2, label="tip reference", aspect_ratio=:equal)
-# # plot!(U_real[1,:], U_real[2,:], linewidth=2, label="real control", aspect_ratio=:equal)
-
-
-# [current_koopman_state[1:9] current_koopman_state[10:18] current_koopman_state[19:27] current_koopman_state[28:36] current_koopman_state[37:45]]
