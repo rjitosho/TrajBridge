@@ -201,10 +201,10 @@ close(mat_file)
 T = 25
 
 # 4 SECOND PERIOD
-T2 = 199
-num_steps = 157
-xref, uref = gen_Z_from_tip_ramp(T2, 5; initial_period=300, final_period=4, ramp_duration=4) #T, history_size
-df = CSV.read("/home/oem/StanfordMSL/TrajBridge/src/bridge_px4/trajectories/EE_fig8_4s_ramp_MPCref.csv", DataFrame)
+# T2 = 199
+# num_steps = 157
+# xref, uref = gen_Z_from_tip_ramp(T2, 5; initial_period=300, final_period=4, ramp_duration=4) #T, history_size
+# df = CSV.read("/home/oem/StanfordMSL/TrajBridge/src/bridge_px4/trajectories/EE_fig8_4s_ramp_MPCref.csv", DataFrame)
 
 # 6 SECOND PERIOD
 # T2 = 
@@ -212,9 +212,10 @@ df = CSV.read("/home/oem/StanfordMSL/TrajBridge/src/bridge_px4/trajectories/EE_f
 # df = CSV.read("/home/oem/StanfordMSL/TrajBridge/src/bridge_px4/trajectories/EE_fig8_6s_ramp_MPCref.csv", DataFrame)
 
 # 10 SECOND PERIOD
-# T2 =
-# xref, uref = gen_Z_from_tip_ramp(T2, 5; initial_period=300, final_period=10, ramp_duration=5) #T, history_size
-# df = CSV.read("/home/oem/StanfordMSL/TrajBridge/src/bridge_px4/trajectories/EE_fig8_10s_ramp_MPCref.csv", DataFrame)
+T2 = 300
+num_steps = 290
+xref, uref = gen_Z_from_tip_ramp(T2, 5; initial_period=300, final_period=10, ramp_duration=5) #T, history_size
+df = CSV.read("/home/oem/StanfordMSL/TrajBridge/src/bridge_px4/trajectories/EE_fig8_10s_ramp_MPCref.csv", DataFrame)
 
 # LONG HORIZON TEST
 # T2 = 999
