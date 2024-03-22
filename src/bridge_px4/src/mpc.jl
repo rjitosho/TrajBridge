@@ -212,8 +212,8 @@ T = 25
 # df = CSV.read("/home/oem/StanfordMSL/TrajBridge/src/bridge_px4/trajectories/EE_fig8_6s_ramp_MPCref.csv", DataFrame)
 
 # 10 SECOND PERIOD
-T2 = 300
-num_steps = 290
+T2 = 313
+num_steps = 285
 xref, uref = gen_Z_from_tip_ramp(T2, 5; initial_period=300, final_period=10, ramp_duration=5) #T, history_size
 df = CSV.read("/home/oem/StanfordMSL/TrajBridge/src/bridge_px4/trajectories/EE_fig8_10s_ramp_MPCref.csv", DataFrame)
 
@@ -227,12 +227,12 @@ df = CSV.read("/home/oem/StanfordMSL/TrajBridge/src/bridge_px4/trajectories/EE_f
 uref = [x[1:3] for x in eachcol(df)]
 # plot_reference(xref, uref)
 # problem_data = MPC(T, T2, A_full, B_full, xref, uref);
-problem_data = MPC(T, T2, A_full, B_full, xref, uref; tip_cost = [1.0, 1.0, 30.0], u_cost = [10.0, 10.0, 1.0]);
+problem_data = MPC(T, T2, A_full, B_full, xref, uref; tip_cost = [1.0, 1.0, 30.0], u_cost = [4.0, 4.0, 1.0]);
 problem_data.solver.options.max_iterations = 4
 problem_data.solver.options.max_dual_updates = 2
 print("Problem data initialized\n")
 
-Z1, Z2, U, Uf = loop(pos_pub, att_pub, pos_pub2, att_pub2, problem_data, current_koopman_state, alpha = .25, num_steps=num_steps, override=false, initial_run=true);
+Z1, Z2, U, Uf = loop(pos_pub, att_pub, pos_pub2, att_pub2, problem_data, current_koopman_state, alpha = .9, num_steps=num_steps, override=false, initial_run=true);
 # Z1, Z2, U, Uf = loop(pos_pub, att_pub, pos_pub2, att_pub2, problem_data, current_koopman_state, num_steps=270, override=false, initial_run=true);
 
 # change_costs!(problem_data, T2; tip_cost = [1.0, 1.0, 30.0], u_cost = [10.0, 10.0, 1.0]);
