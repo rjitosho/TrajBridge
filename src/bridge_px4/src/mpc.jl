@@ -86,11 +86,15 @@ function loop(pos_pub_obj, att_pub_obj, pos_pub_obj2, att_pub_obj2, mpc_data, cu
     i = 0
     
     x_sol, u_sol = mpc_data.x_sol, mpc_data.u_sol
+
+    num_states = length(x_sol[1])
     
     U = zeros(3, num_steps)
     Uf = zeros(3, num_steps)
-    Z1 = zeros(45, num_steps)
-    Z2 = zeros(45, num_steps)
+    Z1 = zeros(num_states, num_steps)
+    Z2 = zeros(num_states, num_steps)
+
+    x_pred = zeros(num_states)
     
     u_filtered = [0.0, 0.0, 1.5]    
 
@@ -108,9 +112,14 @@ function loop(pos_pub_obj, att_pub_obj, pos_pub_obj2, att_pub_obj2, mpc_data, cu
     loop_rate = Rate(20.0)
     for i in 1:num_steps
         t_now = RobotOS.now()
+
+        if i > 1
+            x_pred = kalman_filter_step!(mpc_data.kalman_filter, x_sol[2], current_koopman_state[1:9])
+        end
         
         if ! override
-            x_sol[2] .= current_koopman_state
+            x_sol[2][1:45] .= current_koopman_state
+            x_sol[2][46:54] .= x_pred[46:54]
         end
 
         if ! safety_check(current_koopman_state)
@@ -193,9 +202,15 @@ att_pub2 = Publisher{QuaternionStamped}("/gcs/setpoint/attitude2",queue_size=1)
 
 # Load dynamics
 mat_file = matopen("/home/oem/flyingSysID/deflated_sysID_nice-resample_dt0-05_history-size-5.mat")
+# mat_file = matopen("../flyingSysID/deflated_sysID_nice-resample_dt0-05_history-size-5.mat")
 A_full = read(mat_file, "A_full")
 B_full = read(mat_file, "B_full")
 close(mat_file)
+
+A_extended = [A_full zeros(45, 9); zeros(9, 45) I(9)]
+A_extended[1:9, 46:54] = I(9)
+B_extended = [B_full; zeros(9, 3)]
+KF = KalmanFilter(Matrix(A_extended), B_extended)
 
 # MPC horizon and runtime
 T = 25
@@ -216,6 +231,7 @@ T2 = 313
 num_steps = 285
 xref, uref = gen_Z_from_tip_ramp(T2, 5; initial_period=300, final_period=10, ramp_duration=5) #T, history_size
 df = CSV.read("/home/oem/StanfordMSL/TrajBridge/src/bridge_px4/trajectories/EE_fig8_10s_ramp_MPCref.csv", DataFrame)
+# df = CSV.read("src/bridge_px4/trajectories/EE_fig8_10s_ramp_MPCref.csv", DataFrame)
 
 # LONG HORIZON TEST
 # T2 = 999
@@ -224,10 +240,13 @@ df = CSV.read("/home/oem/StanfordMSL/TrajBridge/src/bridge_px4/trajectories/EE_f
 # df = CSV.read("/home/oem/StanfordMSL/TrajBridge/src/bridge_px4/trajectories/EE_fig8_6s_ramp_OLref_1ksteps.csv", DataFrame)
 
 
+# update xref
+xref = [[x; zeros(9)] for x in xref]
+
 uref = [x[1:3] for x in eachcol(df)]
 # plot_reference(xref, uref)
 # problem_data = MPC(T, T2, A_full, B_full, xref, uref);
-problem_data = MPC(T, T2, A_full, B_full, xref, uref; tip_cost = [1.0, 1.0, 30.0], u_cost = [4.0, 4.0, 1.0]);
+problem_data = MPC(T, T2, A_extended, B_extended, xref, uref, KF; tip_cost = [1.0, 1.0, 30.0], u_cost = [4.0, 4.0, 1.0]);
 problem_data.solver.options.max_iterations = 4
 problem_data.solver.options.max_dual_updates = 2
 print("Problem data initialized\n")
@@ -236,3 +255,9 @@ Z1, Z2, U, Uf = loop(pos_pub, att_pub, pos_pub2, att_pub2, problem_data, current
 # Z1, Z2, U, Uf = loop(pos_pub, att_pub, pos_pub2, att_pub2, problem_data, current_koopman_state, num_steps=270, override=false, initial_run=true);
 
 # change_costs!(problem_data, T2; tip_cost = [1.0, 1.0, 30.0], u_cost = [10.0, 10.0, 1.0]);
+
+
+# test code for KF
+# update_problem!(problem_data.solver, problem_data.objectives[1], problem_data.model, problem_data.x_sol, problem_data.uref[1:length(problem_data.model)])
+# x_sol, u_sol = get_trajectory(problem_data.solver)
+# x_pred = kalman_filter_step!(KF, x_sol[1], x_sol[2][1:9])
