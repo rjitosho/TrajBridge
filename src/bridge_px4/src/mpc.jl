@@ -227,10 +227,10 @@ T = 25
 # df = CSV.read("/home/oem/StanfordMSL/TrajBridge/src/bridge_px4/trajectories/EE_fig8_6s_ramp_MPCref.csv", DataFrame)
 
 # 10 SECOND PERIOD
-T2 = 313
-num_steps = 285
-xref, uref = gen_Z_from_tip_ramp(T2, 5; initial_period=300, final_period=10, ramp_duration=5) #T, history_size
-df = CSV.read("/home/oem/StanfordMSL/TrajBridge/src/bridge_px4/trajectories/EE_fig8_10s_ramp_MPCref.csv", DataFrame)
+# T2 = 313
+# num_steps = 285
+# xref, uref = gen_Z_from_tip_ramp(T2, 5; initial_period=300, final_period=10, ramp_duration=5) #T, history_size
+# df = CSV.read("/home/oem/StanfordMSL/TrajBridge/src/bridge_px4/trajectories/EE_fig8_10s_ramp_MPCref.csv", DataFrame)
 # df = CSV.read("src/bridge_px4/trajectories/EE_fig8_10s_ramp_MPCref.csv", DataFrame)
 
 # LONG HORIZON TEST
@@ -239,11 +239,18 @@ df = CSV.read("/home/oem/StanfordMSL/TrajBridge/src/bridge_px4/trajectories/EE_f
 # xref, uref = gen_Z_from_tip_ramp(T2, 5; initial_period=300, final_period=6, ramp_duration=5) #T, history_size
 # df = CSV.read("/home/oem/StanfordMSL/TrajBridge/src/bridge_px4/trajectories/EE_fig8_6s_ramp_OLref_1ksteps.csv", DataFrame)
 
+# 10 SECOND HOVER
+T2 = 300
+num_steps = 270
+xref = [gen_z_from_tip([0.0, 0.0, 0.5], 45) for i in 1:T2]
+uref = [x[1:3] for x in xref]
 
 # update xref
 xref = [[x; zeros(9)] for x in xref]
 
-uref = [x[1:3] for x in eachcol(df)]
+# TOGGLE THIS ON OR OFF
+# uref = [x[1:3] for x in eachcol(df)]
+
 # plot_reference(xref, uref)
 # problem_data = MPC(T, T2, A_full, B_full, xref, uref);
 problem_data = MPC(T, T2, A_extended, B_extended, xref, uref, KF; tip_cost = [1.0, 1.0, 30.0], u_cost = [4.0, 4.0, 1.0]);

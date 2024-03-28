@@ -1,6 +1,8 @@
 <launch>
       <node pkg="bridge_px4" type="gcs.py" name ="gcs" output="screen">
-            <param name="traj_name" value="kick.csv"/>
+            <param name="traj_name" value="swing_sinusoid.csv"/>
+            <!-- <param name="traj_name" value="kick_1s_005sq.csv"/> -->
+            <!-- <param name="traj_name" value="kick.csv"/> -->
             <!-- <param name="traj_name" value="easier_swingup.csv"/> -->
             <!-- <param name="traj_name" value="EE_fig8_10s_ramp_motionplan.csv"/> -->
             <!-- <param name="traj_name" value="EE_fig8_4s_ramp_OLref.csv"/> -->
