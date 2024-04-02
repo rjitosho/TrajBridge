@@ -81,6 +81,13 @@ z = np.maximum(1.5-.3*t, 0.15*np.ones(len(t)))
 
 # x,y,z = pattern(24*DT, dt, T_wait, T_pattern, x, y, z)
 
+# growing sinusoids
+T = 10.0
+t = np.arange(0.0, T, 0.05)
+x = 0.25*t*np.sin(2*np.pi*t*6/T)
+y = 0*t
+z = 1.5*np.ones(len(t))
+
 # assemble trajectory
 X = np.zeros((14,len(t)))
 X[0,:] = t
@@ -99,4 +106,4 @@ ax.plot(X[1,:], X[2,:])
 plt.show()
 
 # save trajectory
-np.savetxt('prelandv2.csv', X, delimiter=',', fmt='%1.3f')
+np.savetxt('growing_sine_0-25_6.csv', X, delimiter=',', fmt='%1.3f')
