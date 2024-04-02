@@ -13,5 +13,6 @@
                   /gcs/setpoint/attitude
                   /gcs/setpoint/position2
                   /gcs/setpoint/attitude2
-                  /koopman_state"/>
+                  /koopman_state
+                  /koopman_model_offset"/>
 </launch>

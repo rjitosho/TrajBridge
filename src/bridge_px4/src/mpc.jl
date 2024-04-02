@@ -82,7 +82,7 @@ function safety_check(current_koopman_state)
 
 end
 
-function loop(pos_pub_obj, att_pub_obj, pos_pub_obj2, att_pub_obj2, mpc_data, current_koopman_state; alpha = .2, num_steps = 200, override=true, plot_motion_plan=false, initial_run=false)
+function loop(pos_pub_obj, att_pub_obj, pos_pub_obj2, att_pub_obj2, offset_pub, mpc_data, current_koopman_state; alpha = .2, num_steps = 200, override=true, plot_motion_plan=false, initial_run=false, use_kf_offset=0)
     i = 0
     
     x_sol, u_sol = mpc_data.x_sol, mpc_data.u_sol
@@ -119,7 +119,7 @@ function loop(pos_pub_obj, att_pub_obj, pos_pub_obj2, att_pub_obj2, mpc_data, cu
         
         if ! override
             x_sol[2][1:45] .= current_koopman_state
-            x_sol[2][46:54] .= x_pred[46:54]
+            x_sol[2][46:54] .= use_kf_offset*x_pred[46:54]
         end
 
         if ! safety_check(current_koopman_state)
@@ -140,6 +140,11 @@ function loop(pos_pub_obj, att_pub_obj, pos_pub_obj2, att_pub_obj2, mpc_data, cu
         else
             publish_pose_cmd(pos_pub_obj, att_pub_obj, RobotOS.now(), i, u_filtered)
         end
+
+        # publish estimate of koopman model offset
+        offset_pub_msg = Float32MultiArray()
+        offset_pub_msg.data = x_pred[46:54]
+        publish(offset_pub, offset_pub_msg)
 
         # runtime
         solve_time = (RobotOS.now() - t_now).nsecs/10^9
@@ -200,6 +205,8 @@ att_pub = Publisher{QuaternionStamped}("/gcs/setpoint/attitude",queue_size=1)
 pos_pub2 = Publisher{PointStamped}("/gcs/setpoint/position2",queue_size=1)
 att_pub2 = Publisher{QuaternionStamped}("/gcs/setpoint/attitude2",queue_size=1)
 
+offset_pub = Publisher{Float32MultiArray}("/koopman_model_offset",queue_size=1)
+
 # Load dynamics
 mat_file = matopen("/home/oem/flyingSysID/deflated_sysID_nice-resample_dt0-05_history-size-5.mat")
 # mat_file = matopen("../flyingSysID/deflated_sysID_nice-resample_dt0-05_history-size-5.mat")
@@ -253,12 +260,13 @@ xref = [[x; zeros(9)] for x in xref]
 
 # plot_reference(xref, uref)
 # problem_data = MPC(T, T2, A_full, B_full, xref, uref);
-problem_data = MPC(T, T2, A_extended, B_extended, xref, uref, KF; tip_cost = [1.0, 1.0, 30.0], u_cost = [4.0, 4.0, 1.0]);
+# problem_data = MPC(T, T2, A_extended, B_extended, xref, uref, KF; tip_cost = [1.0, 1.0, 30.0], u_cost = [4.0, 4.0, 1.0]);
+problem_data = MPC(T, T2, A_extended, B_extended, xref, uref, KF; tip_cost = [1.0, 1.0, 3.0], u_cost = [4.0, 4.0, 1.0]);
 problem_data.solver.options.max_iterations = 4
 problem_data.solver.options.max_dual_updates = 2
 print("Problem data initialized\n")
 
-Z1, Z2, U, Uf = loop(pos_pub, att_pub, pos_pub2, att_pub2, problem_data, current_koopman_state, alpha = .9, num_steps=num_steps, override=false, initial_run=true);
+Z1, Z2, U, Uf = loop(pos_pub, att_pub, pos_pub2, att_pub2, offset_pub, problem_data, current_koopman_state, alpha = .9, num_steps=num_steps, override=false, initial_run=true, use_kf_offset=0);
 # Z1, Z2, U, Uf = loop(pos_pub, att_pub, pos_pub2, att_pub2, problem_data, current_koopman_state, num_steps=270, override=false, initial_run=true);
 
 # change_costs!(problem_data, T2; tip_cost = [1.0, 1.0, 30.0], u_cost = [10.0, 10.0, 1.0]);
