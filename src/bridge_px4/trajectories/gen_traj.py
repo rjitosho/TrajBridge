@@ -81,21 +81,31 @@ z = np.maximum(1.5-.3*t, 0.15*np.ones(len(t)))
 
 # x,y,z = pattern(24*DT, dt, T_wait, T_pattern, x, y, z)
 
-# growing sinusoids
-T = 10.0
-t = np.arange(0.0, T, 0.05)
-x = 0.1*t*np.sin(2*np.pi*t*6/T)
-y = 0.2*t
-z = 1.5*np.ones(len(t))
+# moving growing sinusoids
+# T = 10.0
+# t = np.arange(0.0, T, 0.05)
+# x = 0.2*t
+# y = 0.1*t*np.sin(2*np.pi*t*6/T)
+# z = 1.5*np.ones(len(t))
 
 # handmade swingup
+# T = 10.0
+# t = np.arange(0.0, T, 0.05)
+# x = 0.25*t*np.sin(2*np.pi*t*6/T)
+# x[108:] = x[108] + 0.25*(t[108:]-t[108])
+# x[128:] = 0*x[128:] + x[128]
+# y = 0*t
+# z = 1.5*np.ones(len(t))
+
+# sinusoids
 T = 10.0
 t = np.arange(0.0, T, 0.05)
-x = 0.25*t*np.sin(2*np.pi*t*6/T)
-x[108:] = x[108] + 0.25*(t[108:]-t[108])
-x[128:] = 0*x[128:] + x[128]
+x = np.clip(0.3*t, 0, 1)*np.sin(2*np.pi*t*6/T)
 y = 0*t
 z = 1.5*np.ones(len(t))
+
+# shifting sinusoid
+x[150:] = x[150:] + t[150:] - t[150]
 
 # assemble trajectory
 X = np.zeros((14,len(t)))
@@ -115,4 +125,4 @@ ax.plot(X[1,:], X[2,:])
 plt.show()
 
 # save trajectory
-np.savetxt('handmade_swing.csv', X, delimiter=',', fmt='%1.3f')
+np.savetxt('shifting_sine_6.csv', X, delimiter=',', fmt='%1.3f')
