@@ -52,34 +52,37 @@ def pattern(t0, dt, wait, period, x, y, z):
 # z = 1.5*np.ones(len(t))
 
 # vine preland - go diagonally in x and z
-T = 100.0
-t = np.arange(0.0, T, 0.05)
-x = np.minimum(.4*t, 1.75*np.ones(len(t)))
-y = np.zeros(len(t))
-z = np.maximum(1.5-.3*t, 0.15*np.ones(len(t)))
+# T = 100.0
+# t = np.arange(0.0, T, 0.05)
+# x = np.minimum(.4*t, 1.75*np.ones(len(t)))
+# y = np.zeros(len(t))
+# z = np.maximum(1.5-.3*t, 0.15*np.ones(len(t)))
 
 # sysID suite
-# dt = 0.05
-# T_step = 8.0
-# T_wait = 2.0
-# T_pattern = 15.0
+dt = 0.05
+T_step = 8.0
+T_wait = 2.0
+T_pattern = 15.0
+T_swinging = 10.0
 
-# T = T_step * 6 + T_wait + T_pattern
-# t = np.arange(0.0, T, dt)
-# x = np.zeros(len(t))
-# y = np.zeros(len(t))
-# z = 1.5*np.ones(len(t))
-# DT = int(T_step/4/dt)
+T = T_step * 3 + T_wait + T_pattern + T_swinging
+t = np.arange(0.0, T, dt)
+x = np.zeros(len(t))
+y = np.zeros(len(t))
+z = 1.5*np.ones(len(t))
+DT = int(T_step/4/dt)
 
-# x = step(0, DT, x)[0]
-# y = step(4*DT, DT, y)[0]
-# z = step(8*DT, DT, z, x_offset=1.5, x_scale=.4)[0]
+x = step(0, DT, x)[0]
+y = step(4*DT, DT, y)[0]
+z = step(8*DT, DT, z, x_offset=1.5, x_scale=.4)[0]
 
-# x,y = step(12*DT, DT, x, y)
-# x,z = step(16*DT, DT, x, z, y_offset=1.5, y_scale=.4)
-# y,z = step(20*DT, DT, y, z, y_offset=1.5, y_scale=.4)
+x,y,z = pattern(12*DT, dt, T_wait, T_pattern, x, y, z)
 
-# x,y,z = pattern(24*DT, dt, T_wait, T_pattern, x, y, z)
+# swinging
+t_start = int(21*DT)
+t_no_offset = t[t_start:] - t[t_start]
+x[t_start:] = 0.1*t_no_offset*np.sin(2*np.pi*t_no_offset*6/T_swinging)
+z[t_start:] = 1.5*np.ones(len(t_no_offset))
 
 # moving growing sinusoids
 # T = 10.0
@@ -98,14 +101,14 @@ z = np.maximum(1.5-.3*t, 0.15*np.ones(len(t)))
 # z = 1.5*np.ones(len(t))
 
 # sinusoids
-T = 10.0
-t = np.arange(0.0, T, 0.05)
-x = np.clip(0.3*t, 0, 1)*np.sin(2*np.pi*t*6/T)
-y = 0*t
-z = 1.5*np.ones(len(t))
+# T = 10.0
+# t = np.arange(0.0, T, 0.05)
+# x = np.clip(0.3*t, 0, 1)*np.sin(2*np.pi*t*6/T)
+# y = 0*t
+# z = 1.5*np.ones(len(t))
 
-# shifting sinusoid
-x[150:] = x[150:] + t[150:] - t[150]
+# # shifting sinusoid
+# x[150:] = x[150:] + t[150:] - t[150]
 
 # assemble trajectory
 X = np.zeros((14,len(t)))
@@ -125,4 +128,4 @@ ax.plot(X[1,:], X[2,:])
 plt.show()
 
 # save trajectory
-np.savetxt('shifting_sine_6.csv', X, delimiter=',', fmt='%1.3f')
+np.savetxt('sysID_w_swinging.csv', X, delimiter=',', fmt='%1.3f')
