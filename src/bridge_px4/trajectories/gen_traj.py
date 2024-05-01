@@ -63,7 +63,7 @@ dt = 0.05
 T_step = 8.0
 T_wait = 2.0
 T_pattern = 15.0
-T_swinging = 10.0
+T_swinging = 13.0
 
 T = T_step * 3 + T_wait + T_pattern + T_swinging
 t = np.arange(0.0, T, dt)
@@ -81,7 +81,9 @@ x,y,z = pattern(12*DT, dt, T_wait, T_pattern, x, y, z)
 # swinging
 t_start = int(21*DT)
 t_no_offset = t[t_start:] - t[t_start]
-x[t_start:] = 0.1*t_no_offset*np.sin(2*np.pi*t_no_offset*6/T_swinging)
+# x[t_start:] = 0.1*t_no_offset*np.sin(2*np.pi*t_no_offset*6/T_swinging) # v2
+# x[t_start:] = 0.2*t_no_offset*np.sin(2*np.pi*t_no_offset*6/T_swinging) # v3
+x[t_start:] = 0.2*t_no_offset*np.sin(2*np.pi*t_no_offset*6/10) # v4
 z[t_start:] = 1.5*np.ones(len(t_no_offset))
 
 # moving growing sinusoids
@@ -128,4 +130,4 @@ ax.plot(X[1,:], X[2,:])
 plt.show()
 
 # save trajectory
-np.savetxt('sysID_w_swinging.csv', X, delimiter=',', fmt='%1.3f')
+np.savetxt('sysID_w_swinging_v4.csv', X, delimiter=',', fmt='%1.3f')

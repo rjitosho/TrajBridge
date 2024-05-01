@@ -1,9 +1,10 @@
 <launch>
       <node pkg="bridge_px4" type="gcs.py" name ="gcs" output="screen">
-      src/bridge_px4/trajectories/growing_sine_0-1_6_0-2.csv
+      <!-- src/bridge_px4/trajectories/growing_sine_0-1_6_0-2.csv -->
+            <param name="traj_name" value="sysID_w_swinging_v4.csv"/>
             <!-- <param name="traj_name" value="handmade_swing.csv"/> -->
             <!-- <param name="traj_name" value="moving_growing_sine_0-1_6_0-2.csv"/> -->
-            <param name="traj_name" value="shifting_sine_6.csv"/>
+            <!-- <param name="traj_name" value="shifting_sine_6.csv"/> -->
             <!-- <param name="traj_name" value="growing_sine_0-2_6_0-2.csv"/> -->
             <!-- <param name="traj_name" value="swing_sinusoid.csv"/> -->
             <!-- <param name="traj_name" value="kick_1s_005sq.csv"/> -->
