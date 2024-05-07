@@ -219,8 +219,9 @@ close(mat_file)
 A_extended = [A_full zeros(45, 9); zeros(9, 45) I(9)]
 A_extended[1:9, 46:54] = I(9)
 B_extended = [B_full; zeros(9, 3)]
-KF = KalmanFilter(Matrix(A_extended), B_extended)
-
+Q_coeff=0.1
+R_coeff=1000 #larger for slower-changing signal
+KF = KalmanFilter(Matrix(A_extended), B_extended; Q_coeff=Q_coeff, R_coeff=R_coeff)
 # MPC horizon and runtime
 T = 25
 
