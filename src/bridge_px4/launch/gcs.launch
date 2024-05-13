@@ -1,6 +1,8 @@
 <launch>
       <node pkg="bridge_px4" type="gcs.py" name ="gcs" output="screen">
-            <param name="traj_name" value="handmade_kick.csv"/>
+            <param name="traj_name" value="2024_05_10_kick.csv"/>
+            <!-- <param name="traj_name" value="handmade_kick_sequence.csv"/> -->
+            <!-- <param name="traj_name" value="handmade_kick.csv"/> -->
             <!-- <param name="traj_name" value="sysID_w_swinging_v4.csv"/> -->
             <!-- <param name="traj_name" value="handmade_swing.csv"/> -->
             <!-- <param name="traj_name" value="moving_growing_sine_0-1_6_0-2.csv"/> -->

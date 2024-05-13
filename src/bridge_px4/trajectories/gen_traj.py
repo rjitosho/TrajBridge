@@ -1,6 +1,7 @@
 import numpy as np
 from numpy import savetxt
 import matplotlib.pyplot as plt
+from scipy import signal
 
 def step(t0, DT, x, y=None, x_offset=0, y_offset=0, x_scale=1, y_scale=1):
     x[t0:t0+DT] = np.zeros(DT) + x_offset
@@ -112,6 +113,81 @@ z[t_start:] = 1.5*np.ones(len(t_no_offset))
 # # shifting sinusoid
 # x[150:] = x[150:] + t[150:] - t[150]
 
+# handmade kick
+T = 1.5
+DT = 100
+t = np.arange(0.0, T, 0.05)
+x = np.zeros(len(t))
+
+t_all = np.arange(0.0, 35.0, 0.05)
+x_all = np.zeros(len(t_all))
+
+def filter_x(x, x1, x2, x3, t1, t2):
+    x[1:t1] = x1
+    x[t1:t2] = x2
+    x[t2:] = x3
+    b, a = signal.butter(3, 0.1)
+    return signal.filtfilt(b, a, x)
+
+# plot
+fig, ax = plt.subplots()
+
+# kick 1
+x1, x2, x3 = -1, 2, 0.5
+t1, t2 = 10, 20
+x = filter_x(x, x1, x2, x3, t1, t2)
+x_all[0:len(t)] = x
+ax.plot(t, x)
+
+# kick 2
+x1, x2, x3 = -1.5, 2.5, 0.5
+t1, t2 = 10, 20
+x = filter_x(x, x1, x2, x3, t1, t2)
+x_all[DT+0 : DT+len(t)] = x
+ax.plot(t, x)
+
+# kick 3
+x1, x2, x3 = -2, 3, 0.5
+t1, t2 = 10, 20
+x = filter_x(x, x1, x2, x3, t1, t2)
+x_all[2*DT+0 : 2*DT+len(t)] = x
+ax.plot(t, x)
+
+# kick 4
+x1, x2, x3 = -1, 2, 0.5
+t1, t2 = 8, 25
+x = filter_x(x, x1, x2, x3, t1, t2)
+x_all[3*DT:3*DT+len(t)] = x
+ax.plot(t, x)
+
+# kick 5
+x1, x2, x3 = -1.5, 2.5, 0.0
+t1, t2 = 8, 25
+x = filter_x(x, x1, x2, x3, t1, t2)
+x_all[4*DT:4*DT+len(t)] = x
+ax.plot(t, x)
+
+# kick 6
+x1, x2, x3 = -2, 3, 0.5
+t1, t2 = 8, 25
+x = filter_x(x, x1, x2, x3, t1, t2)
+x_all[5*DT:5*DT+len(t)] = x
+ax.plot(t, x)
+
+# kick 7
+x1, x2, x3 = -2, 7, 0
+t1, t2 = 12, 18
+x = filter_x(x, x1, x2, x3, t1, t2)
+x_all[6*DT:6*DT+len(t)] = x
+ax.plot(t, x)
+
+plt.show()
+
+t = t_all
+x = x_all
+y = np.zeros(len(t))
+z = 1.5*np.ones(len(t))
+
 # assemble trajectory
 X = np.zeros((14,len(t)))
 X[0,:] = t
@@ -122,12 +198,12 @@ X[7,:] = np.ones(len(t))
 
 # plot
 fig, ax = plt.subplots()
-ax.plot(t, X[1:4,:].T)
+ax.plot(t_all, X[1:4,:].T)
 plt.show()
 
-fig, ax = plt.subplots()
-ax.plot(X[1,:], X[2,:])
-plt.show()
+# fig, ax = plt.subplots()
+# ax.plot(X[1,:], X[2,:])
+# plt.show()
 
 # save trajectory
-np.savetxt('sysID_w_swinging_v4.csv', X, delimiter=',', fmt='%1.3f')
+np.savetxt('handmade_kick_sequence.csv', X, delimiter=',', fmt='%1.3f')
