@@ -39,17 +39,17 @@ class LQRController:
     def koopman_state_callback(self, msg):
         self.last_koopman_state = msg
 
-    def traj_out(self):
+    def traj_out(self, event=None):
         # Unpack some stuff
         kf = self.kf
         t_now = rospy.Time.now()
 
         # compute the control input
-        control_adjustment = self.K @ (self.last_koopman_state - self.x_nom[:, kf])
+        control_adjustment = self.K @ (np.array(self.last_koopman_state.data) - self.x_nom[:, kf])
         u = self.u_nom[:, kf] + self.feedback_multiplier * control_adjustment
         
-        print('Control Adjustment: {}'.format(control_adjustment))
         print('Nominal Control Input: {}'.format(self.u_nom[:, kf]))
+        print('Control Adjustment: {}'.format(control_adjustment))
 
         # Variables to publish
         pos_msg = PointStamped()

@@ -11,6 +11,7 @@ class StatePublisher:
         self.state_pub = rospy.Publisher('/koopman_state', Float32MultiArray, queue_size=10)
         
         self.drone_pose_sub = rospy.Subscriber('/drone5/mavros/local_position/pose', PoseStamped, self.drone_pose_callback)
+        # self.drone_pose_sub = rospy.Subscriber('/drone5/mavros/vision_pose/pose', PoseStamped, self.drone_pose_callback)
         self.tip_pose_sub = rospy.Subscriber('/vrpn_client_node/tip/pose', PoseStamped, self.tip_pose_callback)
         
         self.last_drone_pose = None
