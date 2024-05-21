@@ -1,7 +1,7 @@
 <launch>
       <node pkg="bridge_px4" type="LQR.py" name ="lqr" output="screen">
             <param name="traj_name" value="2024_05_16_kick_uxyz_gx.npz"/>
-            <param name="feedback_multiplier" value="1"/>
+            <param name="feedback_multiplier" value="0"/>
       </node>
       <node pkg="bridge_px4" type="koopman_state_publisher.py" name ="koopman_state_publisher" output="screen"/>
 

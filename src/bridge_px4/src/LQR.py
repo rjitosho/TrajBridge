@@ -23,6 +23,10 @@ class LQRController:
 
         self.dt = 0.05 # 20 Hz
         self.kf = 0 # counter
+        self.pre_counter = 0
+        self.pre_counter_max = 10
+        self.post_counter = 0
+        self.post_counter_max = 10
 
         # Load controller file contents
         self.feedback_multiplier = rospy.get_param("lqr/feedback_multiplier")
@@ -31,44 +35,11 @@ class LQRController:
         address = dir_path+"/../controllers/"+traj_name
         data = np.load(address)
 
-        # Extend the nominal state and control arrays
-        n, m = 10, 10
-        self.x_nom = self.extend_array(data['x_nom'], n, m)
-        self.u_nom = self.extend_array(data['u_nom'], n, m)
-        self.T = self.u_nom.shape[1]
-
-        # Load the controller gains
+        # Extract the data
+        self.x_nom = data['x_nom']
+        self.u_nom = data['u_nom']
         self.K = data['K']
-
-    def extend_array(self, X, n, m):
-        """
-        Extend an array X by adding n columns of the first column of X at the start
-        and m columns of the last column of X at the end.
-        
-        Parameters:
-        X (np.ndarray): The input array.
-        n (int): Number of columns to add at the start.
-        m (int): Number of columns to add at the end.
-        
-        Returns:
-        np.ndarray: The extended array.
-        """
-        # Get the shape of X
-        rows, cols = X.shape
-
-        # Create the new array with the desired shape
-        extended = np.zeros((rows, cols + n + m))
-
-        # Fill the first n columns with the first column of X
-        extended[:, :n] = X[:, 0].reshape(rows, 1)
-
-        # Fill the middle part with X
-        extended[:, n:n+cols] = X
-
-        # Fill the last m columns with the last column of X
-        extended[:, -m:] = X[:, -1].reshape(rows, 1)
-
-        return extended
+        self.T = self.u_nom.shape[1]
 
     def koopman_state_callback(self, msg):
         self.last_koopman_state = msg
@@ -79,11 +50,27 @@ class LQRController:
         t_now = rospy.Time.now()
 
         # compute the control input
-        control_adjustment = self.K @ (np.array(self.last_koopman_state.data) - self.x_nom[:, kf])
-        u = self.u_nom[:, kf] + self.feedback_multiplier * control_adjustment
+        u = np.array([0, 0, 1.5]) # hover
+
+        if self.pre_counter < self.pre_counter_max:
+            self.pre_counter += 1
+
+        elif kf < self.T:
+            control_adjustment = self.K @ (np.array(self.last_koopman_state.data) - self.x_nom[:, kf])
+            u = self.u_nom[:, kf] + self.feedback_multiplier * control_adjustment
+            self.kf += 1
+            print('Nominal Control Input: {}'.format(self.u_nom[:, kf]))
+            print('Control Adjustment: {}'.format(control_adjustment))
         
-        print('Nominal Control Input: {}'.format(self.u_nom[:, kf]))
-        print('Control Adjustment: {}'.format(control_adjustment))
+        elif self.post_counter < self.post_counter_max:
+            u = self.u_nom[:, -1] # hold the last control input
+            self.post_counter += 1
+
+        else:
+            print("------------- TRAJECTORY COMPLETE -------------")            
+            rospy.signal_shutdown("TRAJECTORY COMPLETE")
+
+        print('Control Input: {}'.format(u))
 
         # Variables to publish
         pos_msg = PointStamped()
@@ -112,12 +99,6 @@ class LQRController:
         self.pos_pub.publish(pos_msg)
         self.att_pub.publish(att_msg)
 
-        # Update Counter
-        self.kf += 1
-
-        if self.kf == self.T:
-            print("------------- TRAJECTORY COMPLETE -------------")
-            rospy.signal_shutdown("TRAJECTORY COMPLETE")
 
 if __name__ == '__main__':
     lqr = LQRController()
