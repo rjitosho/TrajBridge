@@ -24,17 +24,51 @@ class LQRController:
         self.dt = 0.05 # 20 Hz
         self.kf = 0 # counter
 
-        # Trajectory Variables
+        # Load controller file contents
         self.feedback_multiplier = rospy.get_param("lqr/feedback_multiplier")
         traj_name = rospy.get_param("lqr/traj_name")
         dir_path = os.path.dirname(os.path.realpath(__file__))
         address = dir_path+"/../controllers/"+traj_name
         data = np.load(address)
 
-        self.x_nom = data['x_nom']
-        self.u_nom = data['u_nom']
-        self.K = data['K']
+        # Extend the nominal state and control arrays
+        n, m = 10, 10
+        self.x_nom = self.extend_array(data['x_nom'], n, m)
+        self.u_nom = self.extend_array(data['u_nom'], n, m)
         self.T = self.u_nom.shape[1]
+
+        # Load the controller gains
+        self.K = data['K']
+
+    def extend_array(self, X, n, m):
+        """
+        Extend an array X by adding n columns of the first column of X at the start
+        and m columns of the last column of X at the end.
+        
+        Parameters:
+        X (np.ndarray): The input array.
+        n (int): Number of columns to add at the start.
+        m (int): Number of columns to add at the end.
+        
+        Returns:
+        np.ndarray: The extended array.
+        """
+        # Get the shape of X
+        rows, cols = X.shape
+
+        # Create the new array with the desired shape
+        extended = np.zeros((rows, cols + n + m))
+
+        # Fill the first n columns with the first column of X
+        extended[:, :n] = X[:, 0].reshape(rows, 1)
+
+        # Fill the middle part with X
+        extended[:, n:n+cols] = X
+
+        # Fill the last m columns with the last column of X
+        extended[:, -m:] = X[:, -1].reshape(rows, 1)
+
+        return extended
 
     def koopman_state_callback(self, msg):
         self.last_koopman_state = msg
