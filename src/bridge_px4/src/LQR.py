@@ -26,7 +26,7 @@ class LQRController:
         self.pre_counter = 0
         self.pre_counter_max = 10
         self.post_counter = 0
-        self.post_counter_max = 10
+        self.post_counter_max = 0
 
         # Load controller file contents
         self.feedback_multiplier = rospy.get_param("lqr/feedback_multiplier")
