@@ -15,11 +15,11 @@ def traj_u_line(t0, t1, x0, x1):
     len = time(t0, t1).shape[0]
     return np.linspace(x0, x1, len)
 
-x0 = traj_u_step(0, 7, 0)
-x1 = traj_u_line(7, 8, 0, 3)
-x2 = traj_u_step(8, 9, 3)
-x3 = traj_u_step(9, 10, 0)
-x4 = traj_u_step(10, 13, 3)
+x0 = traj_u_step(0, 5, 0)
+x1 = traj_u_line(5, 6, 0, 1.5)
+x2 = traj_u_step(6, 6.5, 1.5)
+x3 = traj_u_line(6.5, 7.5, 1.5, 0)
+x4 = traj_u_step(7.5, 13, 0)
 x = np.concatenate((x0, x1, x2, x3, x4))
 t = time(0, 13)
 
@@ -44,4 +44,4 @@ plt.show()
 # plt.show()
 
 # save trajectory
-np.savetxt('/home/oem/StanfordMSL/TrajBridge/src/bridge_px4/trajectories/Traj0527_3_1s_wreverse_large.csv', X, delimiter=',', fmt='%1.3f')
+np.savetxt('/home/oem/StanfordMSL/TrajBridge/src/bridge_px4/trajectories/Traj0527_1.5_1s_wreverse.csv', X, delimiter=',', fmt='%1.3f')

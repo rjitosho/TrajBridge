@@ -5,7 +5,8 @@
             <!-- <param name="traj_name" value="Traj_1.csv"/> -->
             <!-- <param name="traj_name" value="Traj_3.csv"/> -->
             <!-- <param name="traj_name" value="Traj_3_1s.csv"/> -->
-            <param name="traj_name" value="Traj0527_3_1s_wreverse.csv"/>
+            <!-- <param name="traj_name" value="Traj0527_3_1s_wreverse.csv"/> -->
+            <param name="traj_name" value="Traj0527_3_1s_wreverse_large.csv"/>
             <!-- <param name="traj_name" value="2024_05_13_kick_uxyz_gxz.csv"/> -->
             <!-- <param name="traj_name" value="handmade_kick.csv"/> -->
             <!-- <param name="traj_name" value="sysID_w_swinging_v4.csv"/> -->
