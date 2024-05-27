@@ -35,11 +35,11 @@ X[7,:] = np.ones(len(t))
 # plot
 fig, ax = plt.subplots()
 ax.plot(t, X[1:4,:].T)
-plt.show()
+# plt.show()
 
 # fig, ax = plt.subplots()
 # ax.plot(X[1,:], X[2,:])
 # plt.show()
 
 # save trajectory
-np.savetxt('Traj_3_1s.csv', X, delimiter=',', fmt='%1.3f')
+np.savetxt('Traj0527_3_1s.csv', X, delimiter=',', fmt='%1.3f')
