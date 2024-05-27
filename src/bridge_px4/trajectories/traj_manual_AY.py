@@ -17,9 +17,10 @@ def traj_u_line(t0, t1, x0, x1):
 
 x0 = traj_u_step(0, 7, 0)
 x1 = traj_u_line(7, 8, 0, 3)
-x2 = traj_u_step(8, 8.25, 0)
-x3 = traj_u_step(8.25, 13, 3)
-x = np.concatenate((x0, x1, x2, x3))
+x2 = traj_u_step(8, 9, 3)
+x3 = traj_u_step(9, 10, 0)
+x4 = traj_u_step(10, 13, 3)
+x = np.concatenate((x0, x1, x2, x3, x4))
 t = time(0, 13)
 
 y = np.zeros(len(t))
@@ -43,4 +44,4 @@ plt.show()
 # plt.show()
 
 # save trajectory
-np.savetxt('Traj0527_3_1s_wreverse.csv', X, delimiter=',', fmt='%1.3f')
+np.savetxt('/home/oem/StanfordMSL/TrajBridge/src/bridge_px4/trajectories/Traj0527_3_1s_wreverse_large.csv', X, delimiter=',', fmt='%1.3f')
