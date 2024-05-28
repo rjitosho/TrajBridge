@@ -8,15 +8,19 @@ def main():
     pub = rospy.Publisher('pressure_cmd', String, queue_size=1)
 
     while not rospy.is_shutdown():
-        # request body pressure
-        input_str = input("Enter body pressure: ")
-        try:
-            _ = float(input_str)
-        except ValueError:
-            continue
+        # # request body pressure
+        # input_str = input("Enter body pressure: ")
+        # try:
+        #     _ = float(input_str)
+        # except ValueError:
+        #     continue
         
-        pub.publish(input_str)
-        rospy.sleep(0.1)
+        # pub.publish(input_str)
+        # rospy.sleep(0.1)
+
+        pub.publish("0.01")
+        rospy.sleep(1.0)
+        
 
 if __name__ == '__main__':
     try:
