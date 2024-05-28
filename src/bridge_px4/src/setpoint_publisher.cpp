@@ -62,6 +62,7 @@ void SetpointPublisher::att_sp_cb(const geometry_msgs::QuaternionStamped::ConstP
 }
 
 void SetpointPublisher::pose_curr_cb(const geometry_msgs::PoseStamped::ConstPtr& msg){
+    // std::cout << "pose_curr_cb" << std::endl;
     pose_curr = *msg;
 }
 
@@ -122,7 +123,8 @@ void SetpointPublisher::setpoint_cb(const ros::TimerEvent& event)
         // State Transition
         if (ep_stream_state == EP_OFF)
         {
-            land();
+            // land();
+            ROS_WARN("EP_OFF IN LINKED STATE. GOING TO BACK TO STARTUP");
             sp_pub_state = STARTUP;
             ROS_INFO("SP_PUB_STATE: STARTUP");
         } else if ( (ep_stream_state == EP_ON) && (ob_mode_state == OB_ON) && (sp_stream_state == SP_OFF) )
@@ -155,10 +157,12 @@ void SetpointPublisher::setpoint_cb(const ros::TimerEvent& event)
         // State Transition
         if (ep_stream_state == EP_OFF)
         {
+            ROS_WARN("EP OFF IN HOVER STATE. LANDING AND GOING BACK TO STARTUP");
             land();
             sp_pub_state = STARTUP;
             ROS_INFO("SP_PUB_STATE: STARTUP");
         } else if ( (ep_stream_state == EP_ON) && (ob_mode_state == OB_OFF)  ) {
+            ROS_WARN("OB OFF IN HOVER STATE. LANDING AND GOING BACK TO LINKED");
             land();
             sp_pub_state = LINKED;
             ROS_INFO("SP_PUB_STATE: LINKED");
@@ -193,6 +197,7 @@ void SetpointPublisher::setpoint_cb(const ros::TimerEvent& event)
 
         // State Transition
         if ( (ep_stream_state == EP_ON) && (ob_mode_state == OB_OFF) ) {
+            ROS_WARN("OB OFF IN ACTIVE STATE. LANDING AND GOING BACK TO LINKED");
             land();
             sp_pub_state = LINKED;
             ROS_INFO("SP_PUB_STATE: LINKED");
@@ -203,8 +208,8 @@ void SetpointPublisher::setpoint_cb(const ros::TimerEvent& event)
             sp_pub_state = HOVER;
             ROS_INFO("SP_PUB_STATE: HOVER");
         } else if (ep_stream_state == EP_OFF) {
+            ROS_WARN("EP OFF IN ACTIVE STATE. LANDING AND GOING BACK TO STARTUP");
             land();
-
             sp_pub_state = STARTUP;
             ROS_INFO("SP_PUB_STATE: INIT");
         } else {
@@ -216,7 +221,7 @@ void SetpointPublisher::setpoint_cb(const ros::TimerEvent& event)
     break;
     default:
     {
-        ROS_DEBUG("default (should not be here)");
+        ROS_WARN("default (should not be here)");
         land();
     }
     }
@@ -243,6 +248,11 @@ void SetpointPublisher::checkup_cb(const ros::TimerEvent& event) {
         ep_stream_state = EP_ON;
     } else {
         ep_stream_state = EP_OFF;
+        // std::cout << t_now - pose_curr.header.stamp << std::endl;
+        if (sp_pub_state != STARTUP) {
+            ROS_WARN("EP OFF OUTSIDE OF STARTUP. time delta is ");
+            std::cout << t_now - pose_curr.header.stamp << std::endl;
+        }
     }
 
     // Check if Drone is in Safe Ball
@@ -252,6 +262,7 @@ void SetpointPublisher::checkup_cb(const ros::TimerEvent& event) {
                 pose_curr.pose.position.z - pose_sp_out.pose.position.z;
 
     if (err_pos.norm() > r_fs) {
+        ROS_WARN("ERROR NORM TOO LARGE. LANDING AND GOING BACK TO STARTUP");
         land();
 
         sp_pub_state = STARTUP;

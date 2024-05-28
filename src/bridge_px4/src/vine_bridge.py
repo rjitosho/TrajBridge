@@ -7,6 +7,7 @@ import serial
 class VineBridge:
     def __init__(self):
         self.arduino = serial.Serial(port='/dev/ttyACM0', baudrate=115200, timeout=.05)
+        self.pressure_pub = rospy.Publisher("vine_pressure", String, queue_size=1)
 
     # def write_read(self, x):
     #     self.arduino.write(bytes(x, 'utf-8'))
@@ -25,6 +26,9 @@ class VineBridge:
     def pressure_cmd_cb(self, data):
         print("pressure_cmd_cb: " + data.data)
         self.arduino.write(bytes('p'+data.data, 'utf-8'))
+        response = self.arduino.readline()
+        print("response: ", response.decode('utf-8'))
+        self.pressure_pub.publish(response.decode('utf-8'))
     
     def listener(self):
         rospy.init_node('vine_bridge', anonymous=True)
