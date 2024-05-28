@@ -14,5 +14,7 @@
                   /gcs/setpoint/position2
                   /gcs/setpoint/attitude2
                   /koopman_state
-                  /koopman_model_offset"/>
+                  /koopman_model_offset
+                  /vine_pressure
+                  /pressure_cmd"/>
 </launch>

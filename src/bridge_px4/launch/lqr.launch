@@ -18,5 +18,7 @@
                   /drone5/mavros/imu/data
                   /gcs/setpoint/position
                   /gcs/setpoint/attitude
-                  /koopman_state"/>
+                  /koopman_state
+                  /vine_pressure
+                  /pressure_cmd"/>
 </launch>
