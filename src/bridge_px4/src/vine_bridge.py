@@ -26,9 +26,6 @@ class VineBridge:
     def pressure_cmd_cb(self, data):
         print("pressure_cmd_cb: " + data.data)
         self.arduino.write(bytes('p'+data.data, 'utf-8'))
-        response = self.arduino.readline()
-        print("response: ", response.decode('utf-8'))
-        self.pressure_pub.publish(response.decode('utf-8'))
     
     def listener(self):
         rospy.init_node('vine_bridge', anonymous=True)
@@ -36,8 +33,12 @@ class VineBridge:
         rospy.Subscriber("growth_cmd", String, self.growth_cmd_cb)
         rospy.Subscriber("pressure_cmd", String, self.pressure_cmd_cb)
 
+        while not rospy.is_shutdown():
+            response = self.arduino.readline()
+            print("response: ", response.decode('utf-8'))
+            self.pressure_pub.publish(response.decode('utf-8'))
         # spin() simply keeps python from exiting until this node is stopped
-        rospy.spin()
+        # rospy.spin()
 
 if __name__ == '__main__':
     vb = VineBridge()
