@@ -26,11 +26,11 @@ t = time(0, 13)
 
 y = np.zeros(len(t))
 z0 = traj_u_step(0, 5, 1.75)
-z1 = traj_u_line(5, 5.5, 1.75, 1.63)
-z2 = traj_u_step(5.5, 5.75, 1.63)
-z3 = traj_u_line(5.75, 6, 1.63, 1.63)
-z4 = traj_u_step(6, 10, 1.63)
-z5 = traj_u_line(10, 13, 1.63, 1.75)
+z1 = traj_u_line(5, 5.5, 1.75, 1.62)
+z2 = traj_u_step(5.5, 5.75, 1.62)
+z3 = traj_u_line(5.75, 6, 1.62, 1.62)
+z4 = traj_u_step(6, 10, 1.62)
+z5 = traj_u_line(10, 13, 1.62, 1.75)
 z = np.concatenate((z0, z1, z2, z3, z4, z5))
 
 # z = 1.75*np.ones(len(t))
@@ -53,4 +53,4 @@ plt.show()
 # plt.show()
 
 # save trajectory
-np.savetxt('/home/oem/StanfordMSL/TrajBridge/src/bridge_px4/trajectories/Traj0531_pip7.csv', X, delimiter=',', fmt='%1.3f')
+np.savetxt('/home/oem/StanfordMSL/TrajBridge/src/bridge_px4/trajectories/Traj0531_pip8.csv', X, delimiter=',', fmt='%1.3f')
