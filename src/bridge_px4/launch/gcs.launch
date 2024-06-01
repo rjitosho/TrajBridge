@@ -1,10 +1,9 @@
 <launch>
       <node pkg="bridge_px4" type="gcs.py" name ="gcs" output="screen">
-            <!-- <param name="traj_name" value="Traj0527_1.5_1s_wreverse_largest.csv"/> -->
+            <param name="traj_name" value="Traj0531_pip1.csv"/>
             <!-- <param name="traj_name" value="2024_05_13_kick_uxyz_gxz.csv"/> -->
             <!-- <param name="traj_name" value="handmade_kick_sequence.csv"/> -->
             <!-- <param name="traj_name" value="sysID_w_swinging_v2.csv"/> -->
-
             <!-- <param name="traj_name" value="2024_05_10_kick.csv"/> -->
             <!-- <param name="traj_name" value="Traj_1.csv"/> -->
             <!-- <param name="traj_name" value="Traj_3.csv"/> -->
