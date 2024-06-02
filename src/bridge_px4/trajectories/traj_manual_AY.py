@@ -29,9 +29,9 @@ y = np.zeros(len(t))
 z0 = traj_u_step(0, 5, 1.75)
 z1 = traj_u_line(5, 5.5, 1.75, 1.6)
 z2 = traj_u_step(5.5, 5.75, 1.6)
-z3 = traj_u_line(5.75, 6, 1.6, 1.6)
-z4 = traj_u_step(6, 10, 1.6)
-z5 = traj_u_line(10, 13, 1.6, 1.75)
+z3 = traj_u_line(5.75, 6.75, 1.6, 1.95)
+z4 = traj_u_step(6.75, 7.25, 1.95)
+z5 = traj_u_line(7.25, 13, 1.95, 1.75)
 z6 = traj_u_step(13, 17, 1.75)
 z = np.concatenate((z0, z1, z2, z3, z4, z5, z6))
 
@@ -55,4 +55,4 @@ plt.show()
 # plt.show()
 
 # save trajectory
-np.savetxt('/home/oem/StanfordMSL/TrajBridge/src/bridge_px4/trajectories/Traj0602_testwithoutz.csv', X, delimiter=',', fmt='%1.3f')
+np.savetxt('/home/oem/StanfordMSL/TrajBridge/src/bridge_px4/trajectories/Traj0602_testwithz.csv', X, delimiter=',', fmt='%1.3f')
