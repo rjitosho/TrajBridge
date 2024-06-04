@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from scipy import signal
 from scipy.io import loadmat
 
-u = np.array(loadmat('/home/oem/StanfordMSL/TrajBridge/src/bridge_px4/trajectories/Test_0604.mat')['u_opt'])
+u = np.array(loadmat('/home/oem/StanfordMSL/TrajBridge/src/bridge_px4/trajectories/Test_0604_2.mat')['u_opt'])
 print(u.shape)
 
 t = np.arange(159) * 0.05
@@ -64,4 +64,4 @@ plt.show()
 # plt.show()
 
 # save trajectory
-np.savetxt('/home/oem/StanfordMSL/TrajBridge/src/bridge_px4/trajectories/Traj0604_test.csv', X, delimiter=',', fmt='%1.3f')
+np.savetxt('/home/oem/StanfordMSL/TrajBridge/src/bridge_px4/trajectories/Traj0604_test_2.csv', X, delimiter=',', fmt='%1.3f')
