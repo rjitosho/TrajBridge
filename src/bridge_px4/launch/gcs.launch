@@ -1,5 +1,10 @@
 <launch>
       <node pkg="bridge_px4" type="gcs.py" name ="gcs" output="screen">
+            <param name="traj_name" value="2024_06_13_10sfig8_inflated_hs3_1sramp.csv"/>
+            <!-- <param name="traj_name" value="2024_06_13_5sfig8_inflated_hs3_1sramp.csv"/> -->
+            <!-- <param name="traj_name" value="2024_06_13_kick_uxy_gx_inflated.csv"/> -->
+            
+            <!-- JUNE 13 SYSID -->
             <!-- <param name="traj_name" value="sysIDlong.csv"/> -->
             <!-- <param name="traj_name" value="2024_06_04_10sfig8_inflated.csv"/> -->
             <!-- <param name="traj_name" value="2024_06_04_6sfig8_inflated.csv"/> -->
@@ -8,8 +13,9 @@
             <!-- <param name="traj_name" value="Traj0527_3_1s_wreverse.csv"/> -->
             <!-- <param name="traj_name" value="2024_05_13_kick_uxyz_gxz.csv"/> -->
             <!-- <param name="traj_name" value="EE_fig8_10s_motionplan.csv"/> -->
-            <param name="traj_name" value="EE_fig8_6s_motionplan.csv"/>
+            <!-- <param name="traj_name" value="EE_fig8_6s_motionplan.csv"/> -->
 
+            <!-- OLD -->
             <!-- <param name="traj_name" value="Traj0604_test_3.csv"/> -->
             <!-- <param name="traj_name" value="handmade_kick_sequence.csv"/> -->
             <!-- <param name="traj_name" value="sysID_w_swinging_v2.csv"/> -->
