@@ -160,26 +160,26 @@ x = filter_x(x, x1, x2, x3, t1, t2)
 x_all[3*DT:3*DT+len(t)] = x
 ax.plot(t, x)
 
-# kick 5
-x1, x2, x3 = -1.5, 2.5, 0.0
-t1, t2 = 8, 25
-x = filter_x(x, x1, x2, x3, t1, t2)
-x_all[4*DT:4*DT+len(t)] = x
-ax.plot(t, x)
+# # kick 5
+# x1, x2, x3 = -1.5, 2.5, 0.0
+# t1, t2 = 8, 25
+# x = filter_x(x, x1, x2, x3, t1, t2)
+# x_all[4*DT:4*DT+len(t)] = x
+# ax.plot(t, x)
 
-# kick 6
-x1, x2, x3 = -2, 3, 0.5
-t1, t2 = 8, 25
-x = filter_x(x, x1, x2, x3, t1, t2)
-x_all[5*DT:5*DT+len(t)] = x
-ax.plot(t, x)
+# # kick 6
+# x1, x2, x3 = -2, 3, 0.5
+# t1, t2 = 8, 25
+# x = filter_x(x, x1, x2, x3, t1, t2)
+# x_all[5*DT:5*DT+len(t)] = x
+# ax.plot(t, x)
 
-# kick 7
-x1, x2, x3 = -2, 7, 0
-t1, t2 = 12, 18
-x = filter_x(x, x1, x2, x3, t1, t2)
-x_all[6*DT:6*DT+len(t)] = x
-ax.plot(t, x)
+# # kick 7
+# x1, x2, x3 = -2, 7, 0
+# t1, t2 = 12, 18
+# x = filter_x(x, x1, x2, x3, t1, t2)
+# x_all[6*DT:6*DT+len(t)] = x
+# ax.plot(t, x)
 
 plt.show()
 
