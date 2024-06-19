@@ -1,9 +1,15 @@
 <launch>
       <node pkg="bridge_px4" type="gcs.py" name ="gcs" output="screen">
-            <param name="traj_name" value="2024_06_13_10sfig8_inflated_hs3_1sramp.csv"/>
-            <!-- <param name="traj_name" value="2024_06_13_5sfig8_inflated_hs3_1sramp.csv"/> -->
-            <!-- <param name="traj_name" value="2024_06_13_kick_uxy_gx_inflated.csv"/> -->
+            <!-- JUNE 19 OL -->
+            <param name="traj_name" value="2024_06_19_5sfig8_inflated_hs3_2sramp_uxyz.csv"/>
+            <!-- <param name="traj_name" value="2024_06_19_kick_uxyz_gx_inflated.csv"/> -->
             
+            <!-- <param name="traj_name" value="2024_06_19_5sfig8_inflated_hs3_2sramp_uxy.csv"/> -->
+            <!-- <param name="traj_name" value="2024_06_19_kick_uxy_gx_inflated.csv"/> -->
+            
+            <!-- <param name="traj_name" value="2024_06_19_10sfig8_inflated_hs3_1sramp_uxyz.csv"/> -->
+            <!-- <param name="traj_name" value="2024_06_19_10sfig8_inflated_hs3_1sramp_uxy.csv"/> -->
+
             <!-- JUNE 13 SYSID -->
             <!-- <param name="traj_name" value="sysIDlong.csv"/> -->
             <!-- <param name="traj_name" value="2024_06_04_10sfig8_inflated.csv"/> -->
