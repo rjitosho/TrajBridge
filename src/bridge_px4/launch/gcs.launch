@@ -1,7 +1,12 @@
 <launch>
       <node pkg="bridge_px4" type="gcs.py" name ="gcs" output="screen">
+            <!-- OCT 2 SYSID, empty vine with ing! showing -->
+            <!-- <param name="traj_name" value="sysIDlong.csv"/> -->
+            <!-- <param name="traj_name" value="2024_10_02_fig8_period12to4in60s.csv"/> -->
+            <param name="traj_name" value="2024_10_02_handmade_12kicks.csv"/>
+
             <!-- JUNE 19 OL -->
-            <param name="traj_name" value="2024_06_19_5sfig8_inflated_hs3_2sramp_uxyz.csv"/>
+            <!-- <param name="traj_name" value="2024_06_19_5sfig8_inflated_hs3_2sramp_uxyz.csv"/> -->
             <!-- <param name="traj_name" value="2024_06_19_kick_uxyz_gx_inflated.csv"/> -->
             
             <!-- <param name="traj_name" value="2024_06_19_5sfig8_inflated_hs3_2sramp_uxy.csv"/> -->
