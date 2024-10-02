@@ -114,12 +114,12 @@ z[t_start:] = 1.5*np.ones(len(t_no_offset))
 # x[150:] = x[150:] + t[150:] - t[150]
 
 # handmade kick
-T = 1.5
-DT = 100
+T = 2.5
+DT = 80
 t = np.arange(0.0, T, 0.05)
 x = np.zeros(len(t))
 
-t_all = np.arange(0.0, 35.0, 0.05)
+t_all = np.arange(0.0, 50.0, 0.05)
 x_all = np.zeros(len(t_all))
 
 def filter_x(x, x1, x2, x3, t1, t2):
@@ -147,39 +147,74 @@ x_all[DT+0 : DT+len(t)] = x
 ax.plot(t, x)
 
 # kick 3
-x1, x2, x3 = -2, 3, 0.5
+x1, x2, x3 = -1.5, 3, 0.5
 t1, t2 = 10, 20
 x = filter_x(x, x1, x2, x3, t1, t2)
 x_all[2*DT+0 : 2*DT+len(t)] = x
 ax.plot(t, x)
 
 # kick 4
-x1, x2, x3 = -1, 2, 0.5
-t1, t2 = 8, 25
+x1, x2, x3 = 0, 2, 0
+t1, t2 = 10, 20
 x = filter_x(x, x1, x2, x3, t1, t2)
 x_all[3*DT:3*DT+len(t)] = x
 ax.plot(t, x)
 
-# # kick 5
-# x1, x2, x3 = -1.5, 2.5, 0.0
-# t1, t2 = 8, 25
-# x = filter_x(x, x1, x2, x3, t1, t2)
-# x_all[4*DT:4*DT+len(t)] = x
-# ax.plot(t, x)
+# kick 5
+x1, x2, x3 = 0, 2.5, 0.0
+t1, t2 = 10, 20
+x = filter_x(x, x1, x2, x3, t1, t2)
+x_all[4*DT:4*DT+len(t)] = x
+ax.plot(t, x)
 
-# # kick 6
-# x1, x2, x3 = -2, 3, 0.5
-# t1, t2 = 8, 25
-# x = filter_x(x, x1, x2, x3, t1, t2)
-# x_all[5*DT:5*DT+len(t)] = x
-# ax.plot(t, x)
+# kick 6
+x1, x2, x3 = 0, 3, 0
+t1, t2 = 10, 20
+x = filter_x(x, x1, x2, x3, t1, t2)
+x_all[5*DT:5*DT+len(t)] = x
+ax.plot(t, x)
 
-# # kick 7
-# x1, x2, x3 = -2, 7, 0
-# t1, t2 = 12, 18
-# x = filter_x(x, x1, x2, x3, t1, t2)
-# x_all[6*DT:6*DT+len(t)] = x
-# ax.plot(t, x)
+# kick 7
+x1, x2, x3 = 0, 3.5, 0.7
+t1, t2 = 10, 20
+x = filter_x(x, x1, x2, x3, t1, t2)
+x_all[6*DT:6*DT+len(t)] = x
+ax.plot(t, x)
+
+# kick 8
+x1, x2, x3 = 0, 2, 0.7
+t1, t2 = 10, 20
+x = filter_x(x, x1, x2, x3, t1, t2)
+x_all[7*DT:7*DT+len(t)] = x
+ax.plot(t, x)
+
+# kick 9
+x1, x2, x3 = 0, 2, 0.7
+t1, t2 = 10, 20
+x = filter_x(x, x1, x2, x3, t1, t2)
+x_all[8*DT:8*DT+len(t)] = x
+ax.plot(t, x)
+
+# kick 10
+x1, x2, x3 = 0, 2.5, 0.7
+t1, t2 = 10, 20
+x = filter_x(x, x1, x2, x3, t1, t2)
+x_all[9*DT:9*DT+len(t)] = x
+ax.plot(t, x)
+
+# kick 11
+x1, x2, x3 = 0, 3, 0.7
+t1, t2 = 10, 20
+x = filter_x(x, x1, x2, x3, t1, t2)
+x_all[10*DT:10*DT+len(t)] = x
+ax.plot(t, x)
+
+# kick 12
+x1, x2, x3 = 0, 3.5, 0.7
+t1, t2 = 10, 20
+x = filter_x(x, x1, x2, x3, t1, t2)
+x_all[11*DT:11*DT+len(t)] = x
+ax.plot(t, x)
 
 plt.show()
 
@@ -206,4 +241,4 @@ plt.show()
 # plt.show()
 
 # save trajectory
-np.savetxt('handmade_kick_sequence.csv', X, delimiter=',', fmt='%1.3f')
+np.savetxt('2024_10_02_handmade_12kicks.csv', X, delimiter=',', fmt='%1.3f')
