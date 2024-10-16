@@ -1,9 +1,25 @@
 <launch>
       <node pkg="bridge_px4" type="gcs.py" name ="gcs" output="screen">
+            <!-- OCT 16 2 by 2 kick -->
+            <!-- <param name="traj_name" value="motion_plan_kick_2by2_NLtipz_0psi_long_vine_x1.5_z0.75_T50.csv"/> -->
+            <!-- <param name="traj_name" value="motion_plan_kick_2by2_NLtipz_empty_long_vine_x1.5_z0.75_T50.csv"/> -->
+            <!-- <param name="traj_name" value="motion_plan_kick_2by2_NLtipz_0psi_short_vine_x1.5_z1.0_T50.csv"/> -->
+            <param name="traj_name" value="motion_plan_kick_2by2_NLtipz_empty_short_vine_x1.5_z1.0_T50.csv"/>
+
+            <!-- OCT 14 2 by 2 fig 8 -->
+            <!-- <param name="traj_name" value="motion_plan_fig8_2by2_NLtipz_empty_short_vine_10s_ramp1.csv"/> -->
+            <!-- <param name="traj_name" value="motion_plan_fig8_2by2_NLtipz_empty_short_vine_5s_ramp3.csv"/> -->
+            <!-- <param name="traj_name" value="motion_plan_fig8_2by2_NLtipz_0psi_short_vine_10s_ramp1.csv"/> -->
+            <!-- <param name="traj_name" value="motion_plan_fig8_2by2_NLtipz_0psi_short_vine_5s_ramp3.csv"/> -->
+            <!-- <param name="traj_name" value="motion_plan_fig8_2by2_NLtipz_empty_long_vine_10s_ramp1.csv"/> -->
+            <!-- <param name="traj_name" value="motion_plan_fig8_2by2_NLtipz_empty_long_vine_5s_ramp3.csv"/> -->
+            <!-- <param name="traj_name" value="motion_plan_fig8_2by2_NLtipz_0psi_long_vine_10s_ramp1.csv"/> -->
+            <!-- <param name="traj_name" value="motion_plan_fig8_2by2_NLtipz_0psi_long_vine_5s_ramp3.csv"/> -->
+            
             <!-- OCT 2 SYSID, empty vine with ing! showing -->
             <!-- <param name="traj_name" value="sysIDlong.csv"/> -->
             <!-- <param name="traj_name" value="2024_10_02_fig8_period12to4in60s.csv"/> -->
-            <param name="traj_name" value="2024_10_02_handmade_12kicks.csv"/>
+            <!-- <param name="traj_name" value="2024_10_02_handmade_12kicks.csv"/> -->
 
             <!-- JUNE 19 OL -->
             <!-- <param name="traj_name" value="2024_06_19_5sfig8_inflated_hs3_2sramp_uxyz.csv"/> -->
