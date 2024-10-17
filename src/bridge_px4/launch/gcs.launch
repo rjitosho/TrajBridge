@@ -1,10 +1,27 @@
 <launch>
       <node pkg="bridge_px4" type="gcs.py" name ="gcs" output="screen">
+      c:\Users\riann\Documents\Stanford\flyingvine\flyingSysID\motion_plan_kick_2by2_NLnone_0psi_long_vine_x1.5_z0.75_T50.csv c:\Users\riann\Documents\Stanford\flyingvine\flyingSysID\motion_plan_fig8_2by2_NLnone_empty_long_vine_10s_ramp1.csv c:\Users\riann\Documents\Stanford\flyingvine\flyingSysID\motion_plan_fig8_2by2_NLnone_empty_short_vine_10s_ramp1.csv c:\Users\riann\Documents\Stanford\flyingvine\flyingSysID\motion_plan_fig8_2by2_NLnone_0psi_short_vine_10s_ramp1.csv c:\Users\riann\Documents\Stanford\flyingvine\flyingSysID\motion_plan_fig8_2by2_NLnone_0psi_long_vine_10s_ramp1.csv c:\Users\riann\Documents\Stanford\flyingvine\flyingSysID\motion_plan_fig8_2by2_NLnone_0psi_long_vine_5s_ramp3.csv c:\Users\riann\Documents\Stanford\flyingvine\flyingSysID\motion_plan_fig8_2by2_NLnone_0psi_short_vine_5s_ramp3.csv c:\Users\riann\Documents\Stanford\flyingvine\flyingSysID\motion_plan_fig8_2by2_NLnone_empty_short_vine_5s_ramp3.csv c:\Users\riann\Documents\Stanford\flyingvine\flyingSysID\motion_plan_fig8_2by2_NLnone_empty_long_vine_5s_ramp3.csv c:\Users\riann\Documents\Stanford\flyingvine\flyingSysID\motion_plan_kick_2by2_NLnone_empty_long_vine_x1.5_z0.75_T50.csv c:\Users\riann\Documents\Stanford\flyingvine\flyingSysID\motion_plan_kick_2by2_NLnone_empty_short_vine_x1.5_z1.0_T50.csv c:\Users\riann\Documents\Stanford\flyingvine\flyingSysID\motion_plan_kick_2by2_NLnone_0psi_short_vine_x1.5_z1.0_T50.csv
+
+            <!-- OCT 21 2 by 2 kick and fig8 w linear model -->
+            <!-- <param name="traj_name" value="motion_plan_fig8_2by2_NLnone_empty_short_vine_10s_ramp1.csv"/> -->
+            <!-- <param name="traj_name" value="motion_plan_fig8_2by2_NLnone_empty_short_vine_5s_ramp3.csv"/> -->
+            <!-- <param name="traj_name" value="motion_plan_kick_2by2_NLnone_empty_short_vine_x1.5_z1.0_T50.csv"/> -->
+            <!-- <param name="traj_name" value="motion_plan_fig8_2by2_NLnone_0psi_short_vine_10s_ramp1.csv"/> -->
+            <!-- <param name="traj_name" value="motion_plan_fig8_2by2_NLnone_0psi_short_vine_5s_ramp3.csv"/> -->
+            <!-- <param name="traj_name" value="motion_plan_kick_2by2_NLnone_0psi_short_vine_x1.5_z1.0_T50.csv"/> -->
+            
+            <!-- <param name="traj_name" value="motion_plan_fig8_2by2_NLnone_empty_long_vine_10s_ramp1.csv"/> -->
+            <!-- <param name="traj_name" value="motion_plan_fig8_2by2_NLnone_empty_long_vine_5s_ramp3.csv"/> -->
+            <!-- <param name="traj_name" value="motion_plan_kick_2by2_NLnone_empty_long_vine_x1.5_z0.75_T50.csv"/> -->
+            <!-- <param name="traj_name" value="motion_plan_fig8_2by2_NLnone_0psi_long_vine_10s_ramp1.csv"/> -->
+            <!-- <param name="traj_name" value="motion_plan_fig8_2by2_NLnone_0psi_long_vine_5s_ramp3.csv"/> -->
+            <!-- <param name="traj_name" value="motion_plan_kick_2by2_NLnone_0psi_long_vine_x1.5_z0.75_T50.csv"/> -->
+
             <!-- OCT 16 2 by 2 kick -->
             <!-- <param name="traj_name" value="motion_plan_kick_2by2_NLtipz_0psi_long_vine_x1.5_z0.75_T50.csv"/> -->
             <!-- <param name="traj_name" value="motion_plan_kick_2by2_NLtipz_empty_long_vine_x1.5_z0.75_T50.csv"/> -->
             <!-- <param name="traj_name" value="motion_plan_kick_2by2_NLtipz_0psi_short_vine_x1.5_z1.0_T50.csv"/> -->
-            <param name="traj_name" value="motion_plan_kick_2by2_NLtipz_empty_short_vine_x1.5_z1.0_T50.csv"/>
+            <!-- <param name="traj_name" value="motion_plan_kick_2by2_NLtipz_empty_short_vine_x1.5_z1.0_T50.csv"/> -->
 
             <!-- OCT 14 2 by 2 fig 8 -->
             <!-- <param name="traj_name" value="motion_plan_fig8_2by2_NLtipz_empty_short_vine_10s_ramp1.csv"/> -->
