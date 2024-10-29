@@ -3,7 +3,7 @@
 import rospy
 from std_msgs.msg import String
 
-INCREASING_PRESSURE = True
+AUTOMATED_CMD = False
 
 def main():
     rospy.init_node('teensy_communication_pressure')
@@ -12,10 +12,13 @@ def main():
     pressure_cmd = -1
     
     while not rospy.is_shutdown():
-        if INCREASING_PRESSURE:
-            pub.publish(str(pressure_cmd) + "\n")
-            pressure_cmd += 0.01
-            rospy.sleep(0.5)
+        if AUTOMATED_CMD:
+            pub.publish("-.1")
+            # pub.publish(str(round(pressure_cmd,1)))
+            pressure_cmd += 0.02
+            if pressure_cmd > 0.0:
+                pressure_cmd = -.2
+            rospy.sleep(1.1)
 
         else:
             input_str = input("Enter body pressure: ")

@@ -28,7 +28,8 @@ class GCS:
         self.pressure_pub = rospy.Publisher('pressure_cmd', String, queue_size=1)
         self.growth_pub = rospy.Publisher('growth_cmd', String, queue_size=1)
 
-        self.pressure_cmd = -1
+        self.pressure_cmd = -0.29
+        self.growth_counter = 0
 
 
     def traj_gen(self,traj_name,hold,laps) -> Tuple[np.ndarray,np.ndarray]:
@@ -96,10 +97,17 @@ class GCS:
         self.att_pub.publish(att_msg)
 
         # Update Pressure and Growth
-        if self.kf % 18 == 0:
-            self.pressure_pub.publish(str(self.pressure_cmd) + "\n")
-            self.pressure_cmd += 0.05
-            self.growth_pub.publish("7\n")
+        if self.kf % 44 == 0:
+            # self.pressure_pub.publish("-1")
+            self.pressure_pub.publish(str(round(self.pressure_cmd,2)))
+            self.pressure_cmd += 0.01
+            self.pressure_cmd = min(self.pressure_cmd,0.0)
+        
+        if self.kf % 44 == 22:
+            if self.growth_counter < 30:
+                self.growth_pub.publish("7")
+            self.growth_counter += 1
+            
 
         # Update Counter
         self.kf += 1
@@ -113,7 +121,7 @@ class GCS:
             self.kN += 1
 
         if self.kf == self.aN[-1]:
-            self.pressure_pub.publish("-1\n")
+            self.pressure_pub.publish("-1")
             print("[GCS]: Mission Complete")
             rospy.signal_shutdown("GCS Send Complete")
 
