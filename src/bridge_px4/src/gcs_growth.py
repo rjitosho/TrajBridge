@@ -4,7 +4,7 @@ import rospy
 from std_msgs.msg import String
 
 CONTINUOUS_GROWTH = True
-GROWTH_RATE = "7"
+GROWTH_RATE = "7\n"
 
 def main():
     rospy.init_node('teensy_communication_growth')
@@ -13,6 +13,7 @@ def main():
     while not rospy.is_shutdown():
         if CONTINUOUS_GROWTH:
             pub.publish(GROWTH_RATE)
+            print("Growth rate: ", GROWTH_RATE)
             rospy.sleep(0.75)
 
         else:
