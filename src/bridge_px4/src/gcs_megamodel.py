@@ -21,16 +21,18 @@ class GCS:
         # Counters
         self.kf = 0
         self.kN = 0
+        dt = .05
+        hold = dt*(hold//dt)
+        self.Nh = int(hold/dt)+1
 
         # Publishers
         self.pos_pub = rospy.Publisher("gcs/setpoint/position",PointStamped,queue_size=1)
         self.att_pub = rospy.Publisher("gcs/setpoint/attitude",QuaternionStamped,queue_size=1)
         self.pressure_pub = rospy.Publisher('pressure_cmd', String, queue_size=1)
         self.growth_pub = rospy.Publisher('growth_cmd', String, queue_size=1)
-
-        self.pressure_cmd = -0.29
-        self.growth_counter = 0
-
+        
+        self.pressure_cmd = -0.2
+        self.growth_pub.publish("20000") 
 
     def traj_gen(self,traj_name,hold,laps) -> Tuple[np.ndarray,np.ndarray]:
         # Get Address of Trajectory
@@ -97,17 +99,14 @@ class GCS:
         self.att_pub.publish(att_msg)
 
         # Update Pressure and Growth
-        if self.kf % 44 == 0:
+        if ((self.kf-self.Nh) % (80) == 22) and (self.kf > self.Nh):
             # self.pressure_pub.publish("-1")
             self.pressure_pub.publish(str(round(self.pressure_cmd,2)))
-            self.pressure_cmd += 0.01
+            self.pressure_cmd += 0.05
             self.pressure_cmd = min(self.pressure_cmd,0.0)
         
-        if self.kf % 44 == 22:
-            if self.growth_counter < 30:
-                self.growth_pub.publish("7")
-            self.growth_counter += 1
-            
+        if self.kf == self.Nh:
+            self.growth_pub.publish("7")            
 
         # Update Counter
         self.kf += 1
@@ -122,6 +121,7 @@ class GCS:
 
         if self.kf == self.aN[-1]:
             self.pressure_pub.publish("-1")
+            self.growth_pub.publish("1000") 
             print("[GCS]: Mission Complete")
             rospy.signal_shutdown("GCS Send Complete")
 
