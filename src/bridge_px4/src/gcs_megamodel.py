@@ -32,7 +32,7 @@ class GCS:
         self.growth_pub = rospy.Publisher('growth_cmd', String, queue_size=1)
         
         self.pressure_cmd = -0.2
-        self.growth_pub.publish("20000") 
+        # self.growth_pub.publish("20000") 
 
     def traj_gen(self,traj_name,hold,laps) -> Tuple[np.ndarray,np.ndarray]:
         # Get Address of Trajectory
@@ -105,8 +105,8 @@ class GCS:
             self.pressure_cmd += 0.05
             self.pressure_cmd = min(self.pressure_cmd,0.0)
         
-        if self.kf == self.Nh:
-            self.growth_pub.publish("7")            
+        # if self.kf == self.Nh:
+        #     self.growth_pub.publish("7")            
 
         # Update Counter
         self.kf += 1
