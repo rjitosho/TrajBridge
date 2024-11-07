@@ -223,6 +223,13 @@ x = x_all
 y = np.zeros(len(t))
 z = 1.5*np.ones(len(t))
 
+# vine preland - go diagonally in x and z
+T = 100.0
+t = np.arange(0.0, T, 0.05)
+x = -1*np.minimum(.4*t, 1.75*np.ones(len(t)))
+y = np.zeros(len(t))
+z = np.maximum(1.4-.3*t, 0.05*np.ones(len(t)))
+
 # assemble trajectory
 X = np.zeros((14,len(t)))
 X[0,:] = t
@@ -233,7 +240,8 @@ X[7,:] = np.ones(len(t))
 
 # plot
 fig, ax = plt.subplots()
-ax.plot(t_all, X[1:4,:].T)
+ax.plot(t, X[1:4,:].T)
+# ax.plot(t_all, X[1:4,:].T)
 plt.show()
 
 # fig, ax = plt.subplots()
@@ -241,4 +249,4 @@ plt.show()
 # plt.show()
 
 # save trajectory
-np.savetxt('2024_10_02_handmade_12kicks.csv', X, delimiter=',', fmt='%1.3f')
+np.savetxt('preland_reverse.csv', X, delimiter=',', fmt='%1.3f')
