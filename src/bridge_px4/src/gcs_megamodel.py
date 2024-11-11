@@ -99,11 +99,11 @@ class GCS:
         self.att_pub.publish(att_msg)
 
         # Update Pressure and Growth
-        if ((self.kf-self.Nh) % (80) == 22) and (self.kf > self.Nh):
-            # self.pressure_pub.publish("-1")
-            self.pressure_pub.publish(str(round(self.pressure_cmd,2)))
-            self.pressure_cmd += 0.05
-            self.pressure_cmd = min(self.pressure_cmd,0.0)
+        # if ((self.kf-self.Nh) % (80) == 22) and (self.kf > self.Nh):
+        #     self.pressure_pub.publish("0.3")
+            # self.pressure_pub.publish(str(round(self.pressure_cmd,2)))
+            # self.pressure_cmd += 0.05
+            # self.pressure_cmd = min(self.pressure_cmd,0.0)
         
         # if self.kf == self.Nh:
         #     self.growth_pub.publish("7")            
